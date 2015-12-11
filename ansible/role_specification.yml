@@ -1,0 +1,145 @@
+---
+role_specification:
+  - role_name: NucleatorBakeryServiceRunner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBakeryervicesRunnerTrustPolicy
+          Principal :
+            Service : ec2.amazonaws.com
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBakeryServiceRunnerAccessPolicy
+        policy_document:
+          Statement :
+  - role_name: NucleatorBakeryProvisioner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBakeryProvisionerTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBakeryProvisionerAccessPolicy # Includes ability to provision Oracle GeoDB, do everything needed in the "Bakery_provision" playbook...
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "cloudformation:CreateStack"
+                - "cloudformation:UpdateStack"
+                - "cloudformation:DescribeStacks"
+                - "cloudformation:DescribeStackEvents"
+                - "cloudformation:DescribeStackResource"
+                - "cloudformation:GetTemplate"
+                - "cloudformation:ListStackResources"
+              Resource: arn:aws:cloudformation:*
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:GetObject"
+                - "s3:CreateBucket"
+                - "s3:PutObject"
+                - "s3:GetBucketPolicy"
+                - "s3:PutObjectAcl"
+                - "s3:GetObjectAcl"
+                - "s3:PutBucketPolicy"
+                - "s3:DeleteObject"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "ec2:RunInstances"
+                - "ec2:CreateImage"
+                - "ec2:ModifyInstanceAttribute"
+                - "ec2:DescribeInstances"
+                - "ec2:DescribeKeyPairs"
+                - "ec2:DescribeAddresses"
+                - "ec2:CreateSecurityGroup"
+                - "ec2:DescribeSecurityGroups"
+                - "ec2:CreateTags"
+                - "ec2:RevokeSecurityGroupEgress"
+                - "ec2:AuthorizeSecurityGroupEgress"
+                - "ec2:AuthorizeSecurityGroupIngress"
+                - "ec2:DescribeSubnets"
+                - "ec2:DescribeImages"
+                - "ec2:DescribeVpcs"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "iam:CreateInstanceProfile"
+                - "iam:AddRoleToInstanceProfile"
+                - "iam:PassRole"
+              Resource: '*'
+
+  - role_name: NucleatorBakeryInventoryManager
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBakeryInventoryManagerTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBakeryInventoryMangerAccessPolicy
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "ec2:CreateImage"
+                - "ec2:DescribeImages"
+                - "ec2:DescribeInstances"
+                - "ec2:RunInstances"
+                - "ec2:DescribeVolumes"
+                - "ec2:DescribeSnapshots"
+                - "ec2:CreateTags"
+                - "ec2:DescribeTags"
+              Resource: '*'
+  - role_name: NucleatorBakeryDeleter
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBakeryDeleterTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBakeryDeleterAccessPolicy
+        policy_document:
+          Statement :
+            - Effect : Allow
+              Action:
+                - "cloudformation:DescribeStacks"
+                - "cloudformation:DeleteStack"
+                - "cloudformation:DescribeStackEvents"
+              Resource: arn:aws:cloudformation:*
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:GetObject"
+                - "s3:DeleteObject"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "ec2:TerminateInstances"
+                - "ec2:RevokeSecurityGroupEgress"
+                - "ec2:RevokeSecurityGroupIngress"
+                - "ec2:DeleteSecurityGroup"
+                - "ec2:DescribeSecurityGroups"
+                - "ec2:AuthorizeSecurityGroupEgress"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "route53:ListHostedZones"
+                - "route53:ChangeResourceRecordSets"
+                - "route53:GetChange"
+                - "route53:ListResourceRecordSets"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "iam:RemoveRoleFromInstanceProfile"
+                - "iam:DeleteInstanceProfile"
+              Resource: '*'

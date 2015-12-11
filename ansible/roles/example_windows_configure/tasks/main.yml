@@ -1,0 +1,5 @@
+---
+- name: Display the facts for our host
+  debug:
+    var: hostvars[inventory_hostname]
+  when: hostvars is defined and hostvars[inventory_hostname] is defined

@@ -1,0 +1,5 @@
+---
+
+dependencies:
+  - { role: cage_provision }
+  - { role: publish_stackset_templates }

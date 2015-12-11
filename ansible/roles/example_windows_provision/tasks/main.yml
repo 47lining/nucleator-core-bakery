@@ -1,0 +1,92 @@
+---
+
+- name: Check input parameters
+  debug: var=ami_id
+  when: ami_id is defined
+
+- name: Check input parameters
+  debug: msg=" ami_id not defined"
+  when: not ami_id is defined
+
+- name: Check input parameters
+  debug: var=ami_name
+  when: ami_name is defined
+
+# - name: Check input parameters
+#   debug: var=service_name
+#   when: service_name is defined
+
+- name: Check input parameters
+  debug: msg="ami_name not defined"
+  when: not ami_name is defined
+
+- name: Check input parameters
+  debug: var=stackset_instance_name
+  when: stackset_instance_name is defined
+
+- name: "set stackset name"
+  set_fact:
+    stackset_stack_name: "stackset-{{stackset_name}}-{{stackset_instance_name}}-{{cage_name}}-{{account_name}}-{{customer_name}}"
+    stackset_template: "{{ cloudformation_template_instantiation_dir | expanduser }}/{{customer_name}}/{{cage_name}}/stackset/{{stackset_name}}/{{stackset_instance_name}}{{bakery_group}}.json"
+
+- name: Set credentials variable to desired role
+  set_fact:
+    role_credentials: "{{item.NucleatorBakeryProvisioner if bakery_deleting is not defined or not bakery_deleting|bool else item.NucleatorBakeryDeleter}}"
+  with_items:
+    - "{{aws_environment_with_rolenames}}"
+  no_log: True
+
+- name: log credentials variable
+  debug: var=role_credentials
+  when: debug_credentials
+
+- name: use provided ami_id or search by name?
+  set_fact:
+    invoke_search: ami_id == 'None' and not ami_name == 'None'
+    use_ami_id: ami_name == 'None'
+
+- name: search for ami_id by name
+  include: ami_search.yml
+  when: invoke_search
+
+# The bad news is the set_fact doesn't set it :(
+- name: What did we get?
+  debug: msg="ami_id = {{ami_id}}"
+
+- name: "provision stackset via cloudformation"
+  connection: local
+  cloudformation:
+    stack_name="{{ stackset_stack_name }}"
+    state="{{'present' if bakery_deleting is not defined or not bakery_deleting|bool else 'absent'}}"
+    region="{{cage_names[cage_name]["region"]}}"
+    disable_rollback=yes
+    template="{{stackset_template}}"
+  args:
+    template_parameters:
+      CustomerDomain: "{{customer_domain}}"
+      CustomerName: "{{customer_name}}"
+      AccountName: "{{account_name}}"
+      CageName: "{{cage_name}}"
+      ServiceName: "{{service_name}}"
+      InstanceName: "{{ stackset_instance_name }}"
+      VpcId: "{{vpc_id}}"
+      NatSecurityGroupId: "{{nat_security_group_id}}"
+      BastionSecurityGroupId: "{{bastion_security_group_id}}"
+      PublicSubnet1Id: "{{public_subnet1_id}}"
+      PublicSubnet2Id: "{{public_subnet2_id}}"
+      PrivateSubnet1Id: "{{private_subnet1_id}}"
+      PrivateSubnet2Id: "{{private_subnet2_id}}"
+      KeypairName: "{{ keypair_name }}"
+      InstanceType: "{{instance_type}}"
+      AmiId: "{{ami_id}}"
+      ServiceRole: "{{service_role}}"
+
+  environment: role_credentials
+  register: "create_stackset_stack"
+
+- name: show all cloudformation output
+  action: debug msg="{{create_stackset_stack}}"
+
+- name: show cloudformation output parameters
+  action: debug msg="{{create_stackset_stack['stack_outputs']}}"
+  when: bakery_deleting is not defined or not bakery_deleting|bool

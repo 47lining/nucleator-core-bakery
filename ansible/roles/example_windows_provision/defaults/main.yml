@@ -1,0 +1,26 @@
+---
+
+# Defaults
+
+# role arguments
+service_name: bakery
+instance_type: t2.micro
+region: us-east-1
+ami_id: "must-set-this"
+service_role: "NucleatorBakeryServiceRunner"
+
+# group_vars/all
+keypair_name: nucleator
+
+# set by upstream playbooks/roles
+cage_name: None
+
+# determined by nucleator, from cage name, as roles vars
+vpc_id: None
+nat_security_group_id: None
+bastion_security_group_id: None
+public_subnet1_id: None
+public_subnet2_id: None
+private_subnet1_id: None
+private_subnet2_id: None
+database_subnet_group_id: None

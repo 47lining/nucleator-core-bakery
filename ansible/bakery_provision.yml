@@ -1,0 +1,40 @@
+---
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  pre_tasks:
+  - name: establish playbook args
+    set_fact:
+      aws_environment_with_rolenames: "{{aws_environment_with_rolenames}}"
+
+  roles:
+    - config
+    - siteconfig
+    - "{{bakery_group}}_provision"
+
+  vars:
+    cage_name: "{{cage_name}}"
+    customer_name: "{{customer_name}}"
+    stackset_instance_name: "{{ cli_stackset_instance_name }}"
+    # service_name: "{{service_name}}-configinstance-{{node_type}}"
+    ami_id: "{{ ami_id }}"
+    ami_name: "{{ ami_name }}"
+
+- hosts: tag_NucleatorCage_{{cage_name}}:&tag_NucleatorCustomer_{{customer_name}}
+  user: ec2-user
+  connection: local
+  gather_facts: False
+  roles:
+    - nucleatorgroups
+
+  tasks:
+    - name: ensure that ssh config dir exists
+      file: path="{{nucleator_ssh_config_dir}}" state=directory
+
+    - name: generate ssh config
+      bastion_ssh_config:
+        dest: "{{nucleator_ssh_config_dir}}"
+        identity_file: "{{ nucleator_configuration_dir}}/{{ hostvars.localhost.keypair_name }}.pem"
+        user: "{{ hostvars[groups[instance_id][0]].ansible_ssh_user }}"
+        bastion_user: "ec2-user"

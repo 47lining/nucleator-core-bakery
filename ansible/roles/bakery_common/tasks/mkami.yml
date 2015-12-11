@@ -1,0 +1,25 @@
+---
+
+- name: Set credentials variable to desired role
+  set_fact:
+    role_credentials: "{{item.NucleatorBakeryProvisioner}}"
+  with_items:
+    - "{{aws_environment_with_rolenames}}"
+  no_log: True
+  when: aws_environment_with_rolenames is defined
+
+- name: bakery_common | mkami | Snapshot new AMI
+  ec2_ami:
+    state: present
+    instance_id: "{{ instance_id }}"
+    wait: yes
+    wait_timeout: 600
+    name: "{{ ami_name }}"
+    region: "{{ region }}"
+    # Version 2.0 feature:
+    # tags:
+    # 	Service: bakery
+  register: instance
+  environment: "{{ role_credentials }}"
+- name: bakery_common | mkami | Show output
+  debug: var=instance

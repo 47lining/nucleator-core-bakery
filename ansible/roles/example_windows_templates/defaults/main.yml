@@ -1,0 +1,5 @@
+---
+
+configuration_template_description: "Example AMI Bakery"
+
+configuration_template_solution_stack_name: "Example AMI Bakery"

@@ -1,0 +1,20 @@
+---
+
+instance_type: t2.micro
+
+instance_root_volume_size: 16 # GigaBytes
+
+# virgin windows AMIs
+map_aws_region_to_ami:
+  us-east-1:
+    id: ami-e171098b
+  us-west-1:
+    id: ami-8e345aee
+  us-west-2:
+    id: ami-56544537
+  eu-west-1:
+    id: ami-8004dcf3
+
+user_data_script_name: "launch.ps1"
+user_data_script_s3_bucket: "my-devops-bucket"
+user_data_script_s3_key: "path/to/{{user_data_script_name}}"

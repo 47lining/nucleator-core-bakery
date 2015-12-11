@@ -1,0 +1,22 @@
+---
+
+- name: Find AMI id if name is given
+  connection: local
+  ec2_ami_find:
+    name: "{{ ami_name }}"
+    region: "{{ cage_names[cage_name]['region'] }}"
+    role_credentials: "{{ role_credentials }}"
+  register: ami_find
+
+- name: What did we get?
+  debug: var=ami_find.search_results[0].ami_id
+  when: ami_find.search_results is defined
+
+- name: Make sure there is an AMI with that name
+  fail: msg="No AMI with that name is found"
+  when: ami_find.failed or ami_find.search_results|length == 0
+
+- name: Set ami_id if we found one
+  set_fact:
+    ami_id: "{{ ami_find.search_results[0].ami_id }}"
+  when: ami_find.failed is defined and not ami_find.failed and ami_find.search_results|length > 0

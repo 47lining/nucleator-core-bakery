@@ -23,7 +23,7 @@ role_specification:
             AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
           Action : sts:AssumeRole
     access_policies:
-      - policy_name: NucleatorBakeryProvisionerAccessPolicy # Includes ability to provision Oracle GeoDB, do everything needed in the "Bakery_provision" playbook...
+      - policy_name: NucleatorBakeryProvisionerAccessPolicy # Includes ability to do everything needed in the "Bakery_provision" playbook...
         policy_document:
           Statement :
             - Effect: Allow
@@ -51,6 +51,7 @@ role_specification:
             - Effect: Allow
               Action:
                 - "ec2:RunInstances"
+                - "ec2:allocateAddress"
                 - "ec2:CreateImage"
                 - "ec2:ModifyInstanceAttribute"
                 - "ec2:DescribeInstances"

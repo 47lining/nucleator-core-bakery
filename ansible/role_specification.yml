@@ -49,6 +49,7 @@ role_specification:
               Action:
                 - "ec2:RunInstances"
                 - "ec2:allocateAddress"
+                - "ec2:associateAddress"
                 - "ec2:CreateImage"
                 - "ec2:ModifyInstanceAttribute"
                 - "ec2:DescribeInstances"

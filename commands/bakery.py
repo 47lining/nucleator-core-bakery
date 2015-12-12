@@ -202,7 +202,7 @@ class StacksetCommand(Command):
 
         inventory_manager_rolename = self.im_role_name
 
-        playbook = "%s_configure.yml" % bakery_group
+        playbook = "%s_configure.yml" % self.name
 
         cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None)) # pushes credentials into environment
         
@@ -261,7 +261,7 @@ class StacksetCommand(Command):
 
         inventory_manager_rolename = self.im_role_name
 
-        playbook = "%s_publish.yml" % bakery_group
+        playbook = "%s_publish.yml" % self.name
 
         cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None)) # pushes credentials into environment
         

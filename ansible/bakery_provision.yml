@@ -36,5 +36,5 @@
       bastion_ssh_config:
         dest: "{{nucleator_ssh_config_dir}}"
         identity_file: "{{ nucleator_configuration_dir}}/{{ hostvars.localhost.keypair_name }}.pem"
-        user: "{{ hostvars[groups[instance_id][0]].ansible_ssh_user }}"
+        user: "ec2-user"
         bastion_user: "ec2-user"

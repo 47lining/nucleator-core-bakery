@@ -10,65 +10,30 @@
   roles:
     - config
     - siteconfig
-    - nucleatorgroups
+    - propagate_tags
   vars:
     cage_name: "{{cage_name}}"
     customer_name: "{{customer_name}}"
 
-# FOR FUTURE WORK:
-# Copy the ec2_ami_find action_plugin to do ec2_find by name
-- hosts: localhost
+- hosts: tag_NucleatorCage_{{cage_name}}:&tag_NucleatorCustomer_{{customer_name}}
+  user: ec2-user
   connection: local
   gather_facts: False
-  tasks:
-  # - name: Find AMI id if name is given
-  #   connection: local
-  #   ec2_find:
-  #     name: "{{ instance_name }}"
-  #     role_credentials: "{{ role_credentials }}"
-  #   when: instance_id == 'None' and not instance_name == 'None'
-  #   register: instance_find
 
-  # - name: What did we get?
-  #   debug: var=instance_find.search_results[0].instance_id
-  #   when: instance_find.search_results is defined
-
-  # - name: Make sure there is an instance with that name
-  #   fail: msg="No instance with that name is found"
-  #   when: instance_find.failed or instance_find.search_results|length == 0
-
-  # - name: Set instance_id if we found one
-  #   set_fact:
-  #     instance_id: "{{ instance_find.search_results[0].instance_id }}"
-  #   when: instance_id == 'None' and instance_find.failed is defined and not instance_find.failed and instance_find.search_results|length > 0
-
-  # # The bad news is the set_fact doesn't set it :(
-  # - name: What did we get?
-  #   debug: var=instance_id
-
-# This is now done at the end of the provision when the host is actually added.
-# - hosts: tag_NucleatorCage_{{cage_name}}:&tag_NucleatorCustomer_{{customer_name}}
-#   user: ec2-user
-#   connection: local
-#   gather_facts: False
-#   roles:
-#     - nucleatorgroups
-
-#   tasks:
-#     - name: ensure that ssh config dir exists
-#       file: path="{{nucleator_ssh_config_dir}}" state=directory
-
-#     - name: generate ssh config
-#       bastion_ssh_config:
-#         dest: "{{nucleator_ssh_config_dir}}"
-#         identity_file: "{{ nucleator_configuration_dir}}/{{ hostvars.localhost.keypair_name }}.pem"
-#         user: "{{ hostvars[groups[instance_id][0]].ansible_ssh_user }}"
-#         bastion_user: "ec2-user"
-
-- name: Configure instance(s)
-  # all and when clause is only way i could get it to run, everything else "no hosts matched"
-  hosts: all
-  user: hostvars[groups[instance_id][0]].ansible_ssh_user
-  gather_facts: False
   roles:
-    - { role: "{{ node_type }}", instance_id: "{{ instance_id }}", when: "{{ inventory_hostname == groups[instance_id][0] }}" }
+    - nucleatorgroups
+
+  tasks:
+    - name: ensure that ssh config dir exists
+      file: path="{{nucleator_ssh_config_dir}}" state=directory
+
+    - name: generate ssh config
+      bastion_ssh_config:
+        dest: "{{nucleator_ssh_config_dir}}"
+        identity_file: "{{ nucleator_configuration_dir}}/{{ hostvars.localhost.keypair_name }}.pem"
+        user: "ec2-user"
+        bastion_user: "ec2-user"
+
+- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
+  roles:
+    - "{{bakery_group}}_configure"

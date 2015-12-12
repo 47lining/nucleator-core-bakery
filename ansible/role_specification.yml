@@ -10,9 +10,6 @@ role_specification:
             Service : ec2.amazonaws.com
           Action : sts:AssumeRole
     access_policies:
-      - policy_name: NucleatorBakeryServiceRunnerAccessPolicy
-        policy_document:
-          Statement :
   - role_name: NucleatorBakeryProvisioner
     trust_policy:
       Version : "2008-10-17"

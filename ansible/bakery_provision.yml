@@ -13,11 +13,25 @@
           - siteconfig
 
     - name: read flow for specified bakery_group
-      include_vars: "{{ nucleator_configuration_dir }}/contrib/bakery-roles/{{bakery_group}}_recipe.yml"
+      include_vars: "{{ nucleator_configuration_dir }}/contrib/bakery-roles/ansible/{{bakery_group}}_flow.yml"
 
-- include: "{{ provision.pre_plays | default('empty.yml') }}"
+    - name: construct roles list
+      set_fact:
+        included_roles: "{{ baseline_roles + provision.roles}}"
 
-  roles: "{{ baseline_roles + provision.roles}}"
+    - name: log included_roles
+      debug: msg="included_roles={{included_roles}}"
+
+    - name: log provision
+      debug: msg="provision={{provision}}"
+
+    - name: log provision pre_plays
+      debug: msg="provision.pre_plays={{provision.pre_plays}}"
+
+    - name: include provision pre_plays
+      include: "{{ provision.pre_plays | default('empty.yml') }}"
+
+  roles: "{{included_roles}}"
 
   vars:
     cage_name: "{{cage_name}}"
@@ -45,4 +59,5 @@
         user: "ec2-user"
         bastion_user: "ec2-user"
 
-- include: "{{ provision.post_plays | default('empty.yml') }}"
+    - name: innclude provision post_plays
+      include: "{{ provision.post_plays | default('empty.yml') }}"

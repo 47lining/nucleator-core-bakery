@@ -15,7 +15,7 @@
     - name: read flow for specified bakery_group
       include_vars: "{{ nucleator_configuration_dir }}/contrib/bakery-roles/{{bakery_group}}_recipe.yml"
 
-- include: "{{ ( bakery_roles_path ~ "/" ~ provision.pre_plays) if provision.pre_plays is defined else None | default("empty.yml") }}"
+- include: "{{ provision.pre_plays | default("empty.yml") }}"
 
   roles: {{ baseline_roles + provision.roles}}
 
@@ -45,5 +45,4 @@
         user: "ec2-user"
         bastion_user: "ec2-user"
 
-- include: "{{ ( bakery_roles_path ~ "/" ~ provision.post_plays) if provision.post_plays is defined else None | default("empty.yml") }}"
-    
+- include: "{{ provision.post_plays | default("empty.yml") }}"

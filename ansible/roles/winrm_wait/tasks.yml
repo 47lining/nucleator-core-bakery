@@ -1,0 +1,4 @@
+---
+
+- name: wait for winrm port to become available
+  wait_for: port=5986

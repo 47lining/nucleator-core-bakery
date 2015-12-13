@@ -24,8 +24,8 @@
     - nucleatorgroups
 
   tasks:
-    - name: ensure that ssh config dir exists
-      file: path="{{nucleator_ssh_config_dir}}" state=directory
+#    - name: ensure that ssh config dir exists
+#      file: path="{{nucleator_ssh_config_dir}}" state=directory
 
     - name: generate ssh config
       bastion_ssh_config:

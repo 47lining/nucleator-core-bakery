@@ -4,14 +4,20 @@
   connection: local
   gather_facts: False
   pre_tasks:
-  - name: establish playbook args
-    set_fact:
-      aws_environment_with_rolenames: "{{aws_environment_with_rolenames}}"
+    - name: establish playbook args
+      set_fact:
+        aws_environment_with_rolenames: "{{aws_environment_with_rolenames}}"
+        bakery_roles_path: "{{ nucleator_configuration_dir}}/contrib/bakery-roles"
+        baseline_roles:
+          - config
+          - siteconfig
 
-  roles:
-    - config
-    - siteconfig
-    - "{{bakery_group}}_provision"
+    - name: read flow for specified bakery_group
+      include_vars: "{{ nucleator_configuration_dir }}/contrib/bakery-roles/{{bakery_group}}_recipe.yml"
+
+- include: "{{ ( bakery_roles_path ~ "/" ~ provision.pre_plays) if provision.pre_plays is defined else None | default("empty.yml") }}"
+
+  roles: {{ baseline_roles + provision.roles}}
 
   vars:
     cage_name: "{{cage_name}}"
@@ -38,3 +44,6 @@
         identity_file: "{{ nucleator_configuration_dir}}/{{ hostvars.localhost.keypair_name }}.pem"
         user: "ec2-user"
         bastion_user: "ec2-user"
+
+- include: "{{ ( bakery_roles_path ~ "/" ~ provision.post_plays) if provision.post_plays is defined else None | default("empty.yml") }}"
+    

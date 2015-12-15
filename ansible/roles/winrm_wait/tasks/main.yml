@@ -1,0 +1,4 @@
+---
+
+- name: wait for response on winrm port
+  wait_for: port=5986

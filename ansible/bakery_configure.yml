@@ -19,20 +19,13 @@
   user: ec2-user
   connection: local
   gather_facts: False
-
   roles:
     - nucleatorgroups
 
-  tasks:
-#    - name: ensure that ssh config dir exists
-#      file: path="{{nucleator_ssh_config_dir}}" state=directory
-
-#    - name: generate ssh config
-#      bastion_ssh_config:
-#        dest: "{{nucleator_ssh_config_dir}}"
-#        identity_file: "{{ nucleator_configuration_dir}}/{{ hostvars.localhost.keypair_name }}.pem"
-#        user: "ec2-user"
-#        bastion_user: "ec2-user"
+- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
+  gather_facts: false
+  roles:
+    - "{{bakery_group}}_configure_pre"
 
 - hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
   roles:

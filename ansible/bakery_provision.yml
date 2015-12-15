@@ -20,16 +20,3 @@
     # service_name: "{{service_name}}-configinstance-{{node_type}}"
     ami_id: "{{ ami_id }}"
     ami_name: "{{ ami_name }}"
-
-- hosts: tag_NucleatorCage_{{cage_name}}:&tag_NucleatorCustomer_{{customer_name}}
-  user: ec2-user
-  connection: local
-  gather_facts: False
-
-  roles:
-    - nucleatorgroups
-
-- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
-
-  roles:
-    - "{{bakery_group}}_provision_post"

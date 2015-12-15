@@ -1,4 +1,4 @@
 ---
 
-- name: wait for response on winrm port
-  wait_for: port=5986
+- name: wait up to 10 minutes for response on winrm port
+  local_action: wait_for port=5986 host={{ inventory_hostname }} timeout=600

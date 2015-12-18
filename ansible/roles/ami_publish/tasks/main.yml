@@ -1,0 +1,17 @@
+---
+
+- name: Snapshot new AMI
+  ec2_ami:
+    state: present
+    wait: yes
+    wait_timeout: 600
+    name: "{{ami_name}}"
+    region: "{{ami_region}}"
+    # Version 2.0 feature:
+    # tags:
+    #   Service: bakery
+  register: instance
+
+
+- name: Show output
+  debug: var=instance

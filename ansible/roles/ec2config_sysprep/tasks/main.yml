@@ -1,0 +1,14 @@
+---
+
+- name: 'Process our sysprep template'
+  local_action: template src=ec2config_sysprep.ps1 dest=/tmp/ec2config_sysprep.ps1
+
+- name: 'Launch our sysprep powershell script.'
+  script: '/tmp/ec2config_sysprep.ps1'
+  register: sysprep_result
+
+- debug: var=sysprep_result.stdout_lines
+  when: sysprep_result.rc == 0
+
+- debug: var=sysprep_result
+  when: sysprep_result.rc != 0

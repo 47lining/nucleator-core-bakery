@@ -4,27 +4,24 @@
   connection: local
   gather_facts: False
   pre_tasks:
-  - name: Check inputs
-    debug: var=instance_id
   - name: estabish playbook args
     set_fact:
       aws_environment_with_rolenames: "{{aws_environment_with_rolenames}}"
   roles:
     - config
-    - bakery_common
+    - siteconfig
+    - propagate_tags
   vars:
     cage_name: "{{cage_name}}"
     customer_name: "{{customer_name}}"
-    instance_id: "{{ instance_id }}"
-    region: "{{ region }}"
-  tasks:
-    - include: "{{ playbook_dir }}/roles/bakery_common/tasks/mkami.yml"
 
-- hosts: localhost
+- hosts: tag_NucleatorCage_{{cage_name}}:&tag_NucleatorCustomer_{{customer_name}}
+  user: ec2-user
   connection: local
   gather_facts: False
   roles:
-    - bakery_common
-  tasks:
-    - include: "{{ playbook_dir }}/roles/bakery_common/tasks/rminstance.yml"
-      when: delete_instance is defined and delete_instance
+    - nucleatorgroups
+
+- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
+  roles:
+    - "{{bakery_group}}_publish"

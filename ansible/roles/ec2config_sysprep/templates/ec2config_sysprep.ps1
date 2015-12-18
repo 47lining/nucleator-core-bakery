@@ -63,6 +63,6 @@ $xml.Save($SysPrepFilePath)
 
 Write-Host "Successfully saved changes to the SysPrep config file."
 
+# It's lights out for winrm comms after this process completes, instance will be in a stopped state.
 Start-Process -FilePath "$SysPrepProcessPath" -ArgumentList "$SysPrepProcessArguments" -Wait
 
-Write-Host "'$env:COMPUTERNAME' has been successfully SysPrep'd."

@@ -7,7 +7,7 @@ from nucleator.cli import ansible
 import os, subprocess, re, hashlib
 
 class StacksetCommand(Command):
-    
+
     name = "bakery"
     service_role_name = "NucleatorBakeryServiceRunner"
     im_role_name = "NucleatorBakeryInventoryManager"
@@ -120,10 +120,10 @@ class StacksetCommand(Command):
         playbook = "%s_provision.yml" % self.name
 
         cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None))
-        
+
         rc = cli.safe_playbook(self.get_command_playbook(playbook),
                                  inventory_manager_rolename,
-                                 is_static=True, # dynamic inventory not required 
+                                 is_static=True, # dynamic inventory not required
                                  **extra_vars
         )
         # It would be nice at some point to run a configure on what we just provisioned
@@ -137,7 +137,7 @@ class StacksetCommand(Command):
         # playbook = "%s_configure.yml" % self.name
         # rc = cli.safe_playbook(self.get_command_playbook(playbook),
         #                          inventory_manager_rolename,
-        #                          is_static=True, # dynamic inventory not required 
+        #                          is_static=True, # dynamic inventory not required
         #                          **extra_vars
         # )
         return rc
@@ -149,7 +149,7 @@ class StacksetCommand(Command):
         trunc = value[:max - 6]
         hashed = hashlib.md5(value).hexdigest()
         return trunc + hashed[:6]
-    
+
     def validate_names(self, bsname, envname):
         alphanum = re.compile("^[a-zA-Z0-9-]*$")
         if len(bsname) > 99 or bsname.find('/') > -1:
@@ -160,7 +160,7 @@ class StacksetCommand(Command):
             raise ValueError("Invalid namespaced beanstalk environment name {0} (must be < 23 characters and not contain a / character)".format(envname))
         if alphanum.match(envname) is None:
             raise ValueError("Invalid namespaced environment name {0} (must contain only alphanumeric characters and dashes)".format(envname))
-    
+
     def configure(self, **kwargs):
         """
         This command configures an instance of a given node_type
@@ -196,7 +196,7 @@ class StacksetCommand(Command):
         namespaced_service_name = self.safe_hashed_name(namespaced_service_name, 100)
         extra_vars["cli_stackset_name"] = self.name
         extra_vars["cli_stackset_instance_name"] = namespaced_service_name
-        
+
         command_list = []
         command_list.append(self.name)
 
@@ -205,7 +205,7 @@ class StacksetCommand(Command):
         playbook = "%s_configure.yml" % self.name
 
         cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None)) # pushes credentials into environment
-        
+
         return cli.safe_playbook(
             self.get_command_playbook(playbook),
             inventory_manager_rolename,
@@ -234,9 +234,9 @@ class StacksetCommand(Command):
         if customer is None:
             raise ValueError("group must be specified")
 
-        ami_name = kwargs.get("name", None)
+        ami_name = kwargs.get("ami_name", None)
         if ami_name is None:
-            raise ValueError("name must be specified")
+            raise ValueError("An ami name must be specified")
 
         ami_region = kwargs.get("ami_region", None)
 
@@ -264,7 +264,7 @@ class StacksetCommand(Command):
         playbook = "%s_publish.yml" % self.name
 
         cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None)) # pushes credentials into environment
-        
+
         return cli.safe_playbook(
             self.get_command_playbook(playbook),
             inventory_manager_rolename,

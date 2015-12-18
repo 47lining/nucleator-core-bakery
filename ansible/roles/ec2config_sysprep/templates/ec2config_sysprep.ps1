@@ -63,6 +63,6 @@ $xml.Save($SysPrepFilePath)
 
 Write-Host "Successfully saved changes to the SysPrep config file."
 
-Start-Process -FilePath "$SysPrepProcessPath" -ArgumentList "$SysPrepProcessArguments"
+Start-Process -FilePath "$SysPrepProcessPath" -ArgumentList "$SysPrepProcessArguments" -Wait
 
 Write-Host "'$env:COMPUTERNAME' has been successfully SysPrep'd."

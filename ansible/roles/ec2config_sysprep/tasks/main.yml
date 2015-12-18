@@ -12,3 +12,5 @@
 
 - debug: var=sysprep_result
   when: sysprep_result.rc != 0
+
+

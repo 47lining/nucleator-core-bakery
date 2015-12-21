@@ -1,5 +1,12 @@
 ---
 
+- name: Ensure instance is in a stopped state.
+  shell: "aws ec2 describe-instance-status --instance-id {{hostvars[inventory_hostname]['ec2_id']}} --region {{ami_region}}"
+  register: instance_state
+  until: instance_state.stdout.find("\"Name\": \"stopped\"") > -1
+  retries: "{{instance_state_check_retries}}"
+  delay: "{{instance_state_check_delay}}"
+
 - name: Snapshot new AMI
   ec2_ami:
     state: present

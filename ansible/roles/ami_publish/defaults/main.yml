@@ -4,3 +4,6 @@ ami_name: None
 ami_region: us-east-1
 ami_wait_timeout: 9600
 
+instance_state_check_delay: 10
+instance_state_check_retries: 24
+

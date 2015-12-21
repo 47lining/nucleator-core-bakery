@@ -4,7 +4,8 @@
   ec2_ami:
     state: present
     wait: yes
-    wait_timeout: 600
+    wait_timeout: "{{ami_wait_timeout}}"
+    instance_id: "{{hostvars[inventory_hostname]['ec2_id']}}"
     name: "{{ami_name}}"
     region: "{{ami_region}}"
     # Version 2.0 feature:

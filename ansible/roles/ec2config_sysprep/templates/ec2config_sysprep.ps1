@@ -2,6 +2,7 @@
 # --------------------------------------------------------------------------------------------------#
 # Sysprep a configured instance
 # --------------------------------------------------------------------------------------------------#
+
 Param(
     [string]$EC2ConfigSettingsFilePath = "{{ec2config_settings_file_path}}",
     [string]$EC2ConfigHandleUserDataState = "{{ec2config_handle_userdata_state}}",

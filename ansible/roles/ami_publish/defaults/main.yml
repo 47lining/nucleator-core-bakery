@@ -2,4 +2,5 @@
 
 ami_name: None
 ami_region: us-east-1
+ami_wait_timeout: 9600
 

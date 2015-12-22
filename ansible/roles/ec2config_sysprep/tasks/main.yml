@@ -5,15 +5,10 @@
 
 - name: 'Launch our sysprep powershell script.'
   script: '/tmp/ec2config_sysprep.ps1'
-  async: 0
-  poll: 0
   register: sysprep_result
-  ignore_errors: true
 
 - debug: var=sysprep_result.stdout_lines
   when: sysprep_result.rc == 0
 
 - debug: var=sysprep_result
   when: sysprep_result.rc != 0
-
-

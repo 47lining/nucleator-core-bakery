@@ -64,7 +64,12 @@ $xml.Save($SysPrepFilePath)
 
 Write-Host "Successfully saved changes to the SysPrep config file."
 
-# It's lights out for winrm comms after this process completes, instance will be in a stopped state.
-$sysprep_cmd = "{0} {1}" -f $SysPrepProcessPath, $SysPrepProcessArguments
-start-process powershell.exe -argument "-noexit -nologo -noprofile -executionpolicy bypass -command `"& `"$sysprep_cmd`"`""
+$task_name = "SysPrepShutdownTask_{0}" -f $(Get-Date -f MM-dd-yyyy_HH_mm_ss)
+$task_start_time = [datetime]::Now.AddSeconds(10)
+$task_action = New-ScheduledTaskAction -Execute "$SysPrepProcessPath" -Argument "$SysPrepProcessArguments"
+$task_trigger = New-ScheduledTaskTrigger -At $task_start_time -Once
+$task_principal = New-ScheduledTaskPrincipal -UserId Administrator -LogonType S4U -RunLevel Highest
+$task_input_object = New-ScheduledTask -Action $task_action -Trigger $task_trigger -Principal $task_principal
+Register-ScheduledTask -TaskName $task_name -InputObject $task_input_object
 
+Write-Host "Successfully scheduled our SysPrep Shutdown."

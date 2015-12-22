@@ -65,5 +65,6 @@ $xml.Save($SysPrepFilePath)
 Write-Host "Successfully saved changes to the SysPrep config file."
 
 # It's lights out for winrm comms after this process completes, instance will be in a stopped state.
-Start-Process -FilePath "$SysPrepProcessPath" -ArgumentList "$SysPrepProcessArguments" -Wait
+$sysprep_cmd = "{0} {1}" -f $SysPrepProcessPath, $SysPrepProcessArguments
+start-process powershell.exe -argument "-noexit -nologo -noprofile -executionpolicy bypass -command `"& `"$sysprep_cmd`"`""
 

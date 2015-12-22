@@ -18,6 +18,10 @@ role_specification:
                 - "s3:ListBucket"
                 - "s3:GetObject"
               Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "ec2:DescribeInstances"
+              Resource: '*'
   - role_name: NucleatorBakeryProvisioner
     trust_policy:
       Version : "2008-10-17"

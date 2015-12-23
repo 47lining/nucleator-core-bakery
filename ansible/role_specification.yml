@@ -83,7 +83,6 @@ role_specification:
                 - "iam:AddRoleToInstanceProfile"
                 - "iam:PassRole"
               Resource: '*'
-
   - role_name: NucleatorBakeryInventoryManager
     trust_policy:
       Version : "2008-10-17"
@@ -102,6 +101,7 @@ role_specification:
                 - "ec2:CreateImage"
                 - "ec2:DescribeImages"
                 - "ec2:DescribeInstances"
+                - "ec2:DescribeInstanceStatus"
                 - "ec2:RunInstances"
                 - "ec2:DescribeVolumes"
                 - "ec2:DescribeSnapshots"
@@ -153,4 +153,26 @@ role_specification:
               Action:
                 - "iam:RemoveRoleFromInstanceProfile"
                 - "iam:DeleteInstanceProfile"
+              Resource: '*'
+  - role_name: NucleatorBakeryPublisher
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBakeryPublisherTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBakeryPublisherTrustPolicy
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:GetObject"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "ec2:DescribeInstances"
+                - "ec2:DescribeInstanceStatus"
               Resource: '*'

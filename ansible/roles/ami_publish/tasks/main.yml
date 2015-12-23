@@ -22,6 +22,5 @@
   register: instance
   with_items: "{{ groups['MATCH_NUCLEATORSTACKSETINSTANCE__' ~ cli_stackset_instance_name] }}"
 
-
 - name: Show output
   debug: var=instance

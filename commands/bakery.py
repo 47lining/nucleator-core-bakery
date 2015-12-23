@@ -259,7 +259,7 @@ class StacksetCommand(Command):
         command_list = []
         command_list.append(self.name)
 
-        inventory_manager_rolename = self.im_role_name
+        inventory_manager_rolename = "NucleatorBakeryPublisher"
 
         playbook = "%s_publish.yml" % self.name
 

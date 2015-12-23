@@ -69,7 +69,7 @@ $task_start_time = [datetime]::Now.AddSeconds(10)
 $task_action = New-ScheduledTaskAction -Execute "$SysPrepProcessPath" -Argument "$SysPrepProcessArguments"
 $task_trigger = New-ScheduledTaskTrigger -At $task_start_time -Once
 $task_principal = New-ScheduledTaskPrincipal -UserId Administrator -LogonType S4U -RunLevel Highest
-$task_input_object = New-ScheduledTask -Action $task_action -Trigger $task_trigger -Principal $task_principal
-Register-ScheduledTask -TaskName $task_name -InputObject $task_input_object
+$task_settings = New-ScheduledTaskSettingsSet -DisallowHardTerminate -DontStopIfGoingOnBatteries -DontStopOnIdleEnd -Priority 7
+$task_input_object = New-ScheduledTask -Action $task_action -Trigger $task_trigger -Principal $task_principal -Settings $task_settings
 
-Write-Host "Successfully scheduled our SysPrep Shutdown."
+Register-ScheduledTask -TaskName $task_name -InputObject $task_input_object

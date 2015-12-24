@@ -2,8 +2,8 @@
 
 - name: Set Host EC2 Id and Region Facts
   set_fact:
-    host_ec2_id: hostvars[inventory_hostname]['ec2_id']
-    host_ec2_region: hostvars[inventory_hostname]['ec2_region']
+    host_ec2_id: {{hostvars[inventory_hostname]['ec2_id']}}
+    host_ec2_region: {{hostvars[inventory_hostname]['ec2_region']}}
 
 - name: Ensure instance is in a stopped state.
   local_action: "shell aws ec2 describe-instances --instance-id {{host_ec2_id}} --region {{host_ec2_region}} --output json"

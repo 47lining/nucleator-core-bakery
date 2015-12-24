@@ -22,7 +22,7 @@
   roles:
     - nucleatorgroups
 
-- hosts: localhost
+- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
   gather_facts: false
   roles:
     # _configure_pre play covers any pre-requisite tasks to establish

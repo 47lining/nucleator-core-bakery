@@ -1,26 +1,80 @@
 ---
 
+- name: Set Host EC2 Id and Region Facts
+  set_fact:
+    host_ec2_id: hostvars[inventory_hostname]['ec2_id']
+    host_ec2_region: hostvars[inventory_hostname]['ec2_region']
+
 - name: Ensure instance is in a stopped state.
-  shell: "aws ec2 describe-instance-status --instance-id {{hostvars[item]['ec2_id']}} --region {{hostvars[item]['ec2_region']}}"
+  local_action: "shell aws ec2 describe-instances --instance-id {{host_ec2_id}} --region {{host_ec2_region}} --output json"
   register: instance_state
-  until: "instance_state.stdout.find('\"Name\": \"stopped\"') > -1"
+  until: 'instance_state.rc == 0 and instance_state.stdout.lower().find(''"name": "stopped"'') > -1'
   retries: "{{instance_state_check_retries}}"
   delay: "{{instance_state_check_delay}}"
-  with_items: "{{ groups['MATCH_NUCLEATORSTACKSETINSTANCE__' ~ cli_stackset_instance_name] }}"
 
-- name: Snapshot new AMI
-  ec2_ami:
-    state: present
-    wait: yes
-    wait_timeout: "{{ami_wait_timeout}}"
-    instance_id: "{{hostvars[item]['ec2_id']}}"
-    name: "{{ami_name}}"
-    region: "{{hostvars[item]['ec2_region']}}"
-    # Version 2.0 feature:
-    # tags:
-    #   Service: bakery
-  register: instance
-  with_items: "{{ groups['MATCH_NUCLEATORSTACKSETINSTANCE__' ~ cli_stackset_instance_name] }}"
+- set_fact:
+    instance_object: "{{ instance_state.stdout | from_json }}"
 
-- name: Show output
-  debug: var=instance
+- set_fact:
+    instance_block_device_mappings: "{{ instance_object.Reservations[0].Instances[0].BlockDeviceMappings }}"
+
+- debug: var=instance_object
+
+- name: Get Volume info.
+  local_action: "shell aws ec2 describe-volumes --volume-ids {{instance_block_device_mappings[0].Ebs.VolumeId}} --region {{host_ec2_region}} --output json"
+  register: volume_info
+
+- set_fact:
+   volume_object: "{{ volume_info.stdout | from_json }}"
+
+- debug: var=volume_object
+
+- name: Snapshot our new AMI.
+  local_action: 'shell aws ec2 create-image --instance-id {{host_ec2_id}} --region {{host_ec2_region}} --no-reboot --name "{{ ami_name }}" --block-device-mappings "[{\"DeviceName\": \"{{instance_block_device_mappings[0].DeviceName}}\",\"Ebs\":{\"VolumeType\":\"{{volume_object.Volumes[0].VolumeType}}\",\"VolumeSize\":{{volume_object.Volumes[0].Size}}}}]" --output json'
+  register: instance_ami
+
+- set_fact:
+   ami_object: "{{ instance_ami.stdout | from_json }}"
+
+- debug: var=ami_object
+
+- name: Wait for our AMI to be 'available'.
+  local_action: 'shell aws ec2 describe-images --image-id {{ami_object.ImageId}} --region {{host_ec2_region}} --output json'
+  register: ami_info
+  until: 'ami_info.rc == 0 and ami_info.stdout.lower().find(''"state": "available"'') > -1'
+  retries: "{{instance_state_check_retries}}"
+  delay: "{{instance_state_check_delay}}"
+
+- set_fact:
+   ami_info_object: "{{ ami_info.stdout | from_json }}"
+
+- debug: var=ami_info_object
+
+# - name: Ensure instance is in a stopped state.
+#   local_action: "shell aws ec2 describe-instances --instance-id {{host_ec2_id}} --region {{host_ec2_region}}"
+#   register: instance_state
+#   until: "instance_state.rc == 0 and instance_state.stdout.find('\"Name\": \"stopped\"') > -1"
+#   retries: "{{instance_state_check_retries}}"
+#   delay: "{{instance_state_check_delay}}"
+
+# - name: Snapshot new AMI
+#   local_action:
+#     ec2_ami:
+#       state: present
+#       wait: yes
+#       wait_timeout: "{{ami_wait_timeout}}"
+#       instance_id: "{{host_ec2_id}}"
+#       name: "{{ami_name}}"
+#       region: "{{host_ec2_region}}"
+#       device_mapping:
+#           - device_name: /dev/sda1
+#             size: 128
+#             delete_on_termination: true
+#             volume_type: gp2
+#       # Version 2.0 feature:
+#       # tags:
+#       #   Service: bakery
+#     register: instance
+
+# - name: Show output
+#   debug: var=instance

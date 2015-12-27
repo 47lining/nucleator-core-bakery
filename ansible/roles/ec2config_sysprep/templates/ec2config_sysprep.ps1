@@ -5,8 +5,9 @@
 
 Param(
     [string]$EC2ConfigSettingsFilePath = "{{ec2config_settings_file_path}}",
-    [string]$EC2ConfigHandleUserDataState = "{{ec2config_handle_userdata_state}}",
-    [string]$EC2ConfigSetComputerName = "{{ec2config_set_computer_name_state}}",
+    [string]$EC2ConfigSetPassword = "{{ec2config_set_password}}",
+    [string]$EC2ConfigHandleUserData = "{{ec2config_handle_userdata}}",
+    [string]$EC2ConfigSetComputerName = "{{ec2config_set_computer_name}}",
     [string]$SysPrepFilePath = "{{sysprep_file_path}}",
     [string]$SysPrepProcessPath = "{{sysprep_process_path}}",
     [string]$SysPrepProcessArguments = "{{sysprep_process_arguments}}",
@@ -26,10 +27,11 @@ $xmlElementToModify = $xmlElement.Plugins
 
 foreach ($element in $xmlElementToModify.Plugin){
     if ($element.name -eq "Ec2SetPassword"){
-        $element.State="Disabled"
+        Write-Host "Setting 'Ec2SetPassword' to '$EC2ConfigSetPassword'."
+        $element.State="$EC2ConfigSetPassword"
     }elseif($element.name -eq "Ec2HandleUserData"){
-        Write-Host "Setting 'Ec2HandleUserData' to '$EC2ConfigHandleUserDataState'."
-        $element.State="$EC2ConfigHandleUserDataState"
+        Write-Host "Setting 'Ec2HandleUserData' to '$EC2ConfigHandleUserData'."
+        $element.State="$EC2ConfigHandleUserData"
     }elseif($element.name -eq "Ec2SetComputerName"){
         Write-Host "Setting 'Ec2SetComputerName' to '$EC2ConfigSetComputerName'."
         $element.State="$EC2ConfigSetComputerName"
@@ -54,6 +56,7 @@ foreach( $element in $xml.unattend.settings.component ){
                 $APPlainTextElement = $AdminPassword.AppendChild($xml.CreateElement("PlainText"));
                 $UserAccounts.AppendChild($AdminPassword)
             }
+            Write-Host "Setting static admin password."
             $AdminPassword.Value = "$SysPrepStaticPassword"
             $AdminPassword.PlainText = "True"
             break
@@ -72,4 +75,4 @@ $task_principal = New-ScheduledTaskPrincipal -UserId Administrator -LogonType S4
 $task_settings = New-ScheduledTaskSettingsSet -DisallowHardTerminate -DontStopIfGoingOnBatteries -DontStopOnIdleEnd -Priority 7
 $task_input_object = New-ScheduledTask -Action $task_action -Trigger $task_trigger -Principal $task_principal -Settings $task_settings
 
-Register-ScheduledTask -TaskName $task_name -InputObject $task_input_object
+Register-ScheduledTask -TaskName $task_name -InputObject $task_input_object -Force

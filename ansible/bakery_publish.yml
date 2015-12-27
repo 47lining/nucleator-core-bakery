@@ -28,7 +28,8 @@
     # (e.g. sysprep, clean shutdown, hostname cleansing, creds cleanup, etc.)
     - "{{bakery_group}}_prepare_instances_for_publishing"
 
-- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
+- hosts: localhost
+  gather_facts: False
   roles:
     # _publish_post runs on localhost, covers wait for readiness
     # (e.g. wait for stopped state) and ami publishing tasks

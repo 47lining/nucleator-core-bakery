@@ -3,8 +3,6 @@
 - name: Set hosts to image
   set_fact:
     targets: "{{ groups['MATCH_NUCLEATORGROUP__' ~ bakery_group] | intersect(groups[ 'MATCH_NUCLEATORSTACKSETINSTANCE__' ~ cli_stackset_instance_name]) }}"
-    instance_ami: []
-    ami_info: []
 
 - name: Log hosts to image
   debug: msg="{{targets}}"
@@ -19,22 +17,20 @@
 
 - name: Create AMIs
   shell: "aws ec2 create-image --instance-id {{hostvars[item]['ec2_id']}} --region {{hostvars[item]['ec2_region']}} --no-reboot --name '{{ ami_name }}' --output json"
-  register: instance_ami[item]
+  register: instance_ami
   with_items: targets
 
 - name: log ami creation output
-  debug: msg="{{ instance_ami[item].stdout | from_json }}"
-  with_items: targets
+  debug: msg="{{ instance_ami.stdout | from_json }}"
 
 - name: Wait for our AMI to be 'available'.
   shell: 'aws ec2 describe-images --image-id {{ami_object.ImageId}} --region {{host_ec2_region}} --output json'
-  register: ami_info[item]
-  until: 'ami_info[item].rc == 0 and ami_info[item].stdout.lower().find(''"state": "available"'') > -1'
+  register: ami_info
+  until: 'ami_info.rc == 0 and ami_info.stdout.lower().find(''"state": "available"'') > -1'
   retries: "{{instance_state_check_retries}}"
   delay: "{{instance_state_check_delay}}"
   with_items: targets
 
 - name: log ami info
-  debug: msg="{{ ami_info[item].stdout | from_json }}"
-  with_items: targets
+  debug: msg="{{ ami_info.stdout | from_json }}"
   

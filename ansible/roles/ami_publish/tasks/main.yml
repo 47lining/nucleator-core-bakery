@@ -3,12 +3,20 @@
 - name: Set hosts to image
   set_fact:
     targets: "{{ groups['MATCH_NUCLEATORGROUP__' ~ bakery_group] | intersect(groups[ 'MATCH_NUCLEATORSTACKSETINSTANCE__' ~ cli_stackset_instance_name]) }}"
+    # all instances are in same region, simplify and determine once
 
 - name: Log hosts to image
   debug: msg="{{targets}}"
 
+- name: Set instance region
+  set_fact:
+    instance_region: "{{hostvars[targets[0]]['ec2_region']}}"
+
+- name: Log instance region
+  debug: msg="{{instance_region}}"
+
 - name: Ensure instance is in a stopped state.
-  shell: "aws ec2 describe-instances --instance-id {{hostvars[item]['ec2_id']}} --region {{hostvars[item]['ec2_region']}} --output json"
+  shell: "aws ec2 describe-instances --instance-id {{hostvars[item]['ec2_id']}} --region {{instance_region}} --output json"
   register: instance_state
   until: 'instance_state.rc == 0 and instance_state.stdout.lower().find(''"name": "stopped"'') > -1'
   retries: "{{instance_state_check_retries}}"
@@ -16,21 +24,35 @@
   with_items: targets
 
 - name: Create AMIs
-  shell: "aws ec2 create-image --instance-id {{hostvars[item]['ec2_id']}} --region {{hostvars[item]['ec2_region']}} --no-reboot --name '{{ ami_name }}' --output json"
-  register: instance_ami
+  shell: "aws ec2 create-image --instance-id {{hostvars[item]['ec2_id']}} --region instance_region --no-reboot --name '{{ ami_name }}' --output json"
+  register: registered_create_image
   with_items: targets
 
 - name: log ami creation output
-  debug: msg="{{ instance_ami.stdout | from_json }}"
+  debug: msg="{{ registered_create_image }}"
 
-- name: Wait for our AMI to be 'available'.
-  shell: 'aws ec2 describe-images --image-id {{ami_object.ImageId}} --region {{host_ec2_region}} --output json'
+- name: get list of stdouts from create-image output
+  set_fact:
+    stdouts: "{{ registered_create_image.results|map(attribute='stdout')|from_json"
+  
+- name: log stdouts
+  debug: msg="{{ stdouts }}"
+
+- name: get list of ami-ids from create-image output
+  set_fact:
+    ami_ids: "{{ stdouts|map(attribute='ImageId')|list }}"
+  
+- name: log ami-ids
+  debug: msg="{{ ami_ids }}"
+
+- name: Wait for all AMIs to be available.
+  shell: 'aws ec2 describe-images --image-id {{item}} --region instance_region --output json'
   register: ami_info
   until: 'ami_info.rc == 0 and ami_info.stdout.lower().find(''"state": "available"'') > -1'
   retries: "{{instance_state_check_retries}}"
   delay: "{{instance_state_check_delay}}"
-  with_items: targets
+  with_items: ami_ids
 
 - name: log ami info
-  debug: msg="{{ ami_info.stdout | from_json }}"
+  debug: msg="{{ ami_info }}"
   

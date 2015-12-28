@@ -23,34 +23,23 @@
   delay: "{{instance_state_check_delay}}"
   with_items: targets
 
-- name: fail if instance is not stopped
-  fail: "instance failed to reach stopped state"
-  when: "{{ instance_state.attempts >= instance_state_check_retries }}"
-
 - name: Create AMIs
   shell: "aws ec2 create-image --instance-id {{hostvars[item]['ec2_id']}} --region {{instance_region}} --no-reboot --name '{{ ami_name }}' --output json"
-  register: registered_create_image
+  register: create_image
   with_items: targets
 
 - name: log ami creation output
-  debug: msg="{{ registered_create_image }}"
-
-- name: get list of stdouts from create-image output
-  set_fact:
-    stdouts: "{{ registered_create_image.results|map(attribute='stdout') }}"
-  
-- name: log stdouts
-  debug: msg="{{ stdouts }}"
+  debug: msg="{{ create_image }}"
 
 - name: get list of ami-ids from create-image output
   set_fact:
-    ami_ids: "{{ stdouts|map(attribute='ImageId')|list }}"
+    ami_ids: "{{ create_image.results | map(attribute='stdout') | list | map('from_json') | map(attribute='ImageId') | list }}"
   
 - name: log ami-ids
   debug: msg="{{ ami_ids }}"
 
 - name: Wait for all AMIs to be available.
-  shell: 'aws ec2 describe-images --image-id {{item}} --region instance_region --output json'
+  shell: 'aws ec2 describe-images --image-id {{item}} --region {{instance_region}} --output json'
   register: ami_info
   until: 'ami_info.rc == 0 and ami_info.stdout.lower().find(''"state": "available"'') > -1'
   retries: "{{instance_state_check_retries}}"

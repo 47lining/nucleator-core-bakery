@@ -24,7 +24,7 @@
   with_items: targets
 
 - name: Create AMIs
-  shell: "aws ec2 create-image --instance-id {{hostvars[item]['ec2_id']}} --region instance_region --no-reboot --name '{{ ami_name }}' --output json"
+  shell: "aws ec2 create-image --instance-id {{hostvars[item]['ec2_id']}} --region {{instance_region}} --no-reboot --name '{{ ami_name }}' --output json"
   register: registered_create_image
   with_items: targets
 

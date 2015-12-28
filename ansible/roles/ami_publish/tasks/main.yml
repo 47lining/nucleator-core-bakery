@@ -23,6 +23,10 @@
   delay: "{{instance_state_check_delay}}"
   with_items: targets
 
+- name: fail if instance is not stopped
+  fail: "instance failed to reach stopped state"
+  when: "{{ instance_state.attempts >= instance_state_check_retries }}"
+
 - name: Create AMIs
   shell: "aws ec2 create-image --instance-id {{hostvars[item]['ec2_id']}} --region {{instance_region}} --no-reboot --name '{{ ami_name }}' --output json"
   register: registered_create_image
@@ -33,7 +37,7 @@
 
 - name: get list of stdouts from create-image output
   set_fact:
-    stdouts: "{{ registered_create_image.results|map(attribute='stdout')|from_json"
+    stdouts: "{{ registered_create_image.results|map(attribute='stdout') }}"
   
 - name: log stdouts
   debug: msg="{{ stdouts }}"

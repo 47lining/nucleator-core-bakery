@@ -21,6 +21,7 @@ Trap
 }
 $ErrorActionPreference = "Stop"
 
+
 $xml = [System.Xml.XmlDocument](Get-Content $EC2ConfigSettingsFilePath)
 $xmlElement = $xml.get_DocumentElement()
 $xmlElementToModify = $xmlElement.Plugins

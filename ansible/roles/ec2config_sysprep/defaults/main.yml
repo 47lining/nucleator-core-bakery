@@ -7,6 +7,6 @@ ec2config_set_computer_name: 'Enabled'
 
 sysprep_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/sysprep2008.xml'
 sysprep_process_path: 'C:/Windows/System32/Sysprep/Sysprep.exe'
-sysprep_process_arguments: '/unattend: "{{sysprep_file_path}}" /oobe /generalize /shutdown'
+sysprep_process_arguments: '/unattend: \"{{sysprep_file_path}}\" /oobe /generalize /shutdown'
 sysprep_static_password: ChangeM3!
 

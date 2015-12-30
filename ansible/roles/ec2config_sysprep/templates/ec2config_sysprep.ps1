@@ -53,6 +53,12 @@ foreach ($element in $xmlElementToModify.Plugin){
     }elseif($element.name -eq "Ec2SetComputerName"){
         Write-Host "Setting 'Ec2SetComputerName' to '$EC2ConfigSetComputerName'."
         $element.State="$EC2ConfigSetComputerName"
+    }elseif($element.name -eq "Ec2DynamicBootVolumeSize"){
+        Write-Host "Setting 'Ec2DynamicBootVolumeSize' to 'Enabled'."
+        $element.State="Enabled"
+    }elseif($element.name -eq "Ec2EventLog"){
+        Write-Host "Setting 'Ec2EventLog' to 'Enabled'."
+        $element.State="Enabled"
     }
 }
 $xml.Save($EC2ConfigSettingsFilePath)

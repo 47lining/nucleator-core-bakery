@@ -21,6 +21,8 @@ role_specification:
             - Effect: Allow
               Action:
                 - "ec2:DescribeInstances"
+                - "ec2:CreateTags"
+                - "ec2:DescribeTags"
               Resource: '*'
   - role_name: NucleatorBakeryProvisioner
     trust_policy:
@@ -179,4 +181,6 @@ role_specification:
                 - "ec2:DescribeInstances"
                 - "ec2:DescribeInstanceStatus"
                 - "ec2:DescribeVolumes"
+                - "ec2:CreateTags"
+                - "ec2:DescribeTags"
               Resource: '*'

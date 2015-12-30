@@ -10,3 +10,5 @@ sysprep_process_path: 'C:/Windows/System32/Sysprep/Sysprep.exe'
 sysprep_process_arguments: '/generalize /oobe /shutdown /quiet'
 sysprep_static_password: ChangeM3!
 
+ec2config_bundle_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/Settings/BundleConfig.xml'
+

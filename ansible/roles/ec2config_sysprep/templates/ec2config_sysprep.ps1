@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------------#
 
 Param(
+    [string]$EC2ConfigBundleFilePath = "{{ec2config_bundle_file_path}}",
     [string]$EC2ConfigSettingsFilePath = "{{ec2config_settings_file_path}}",
     [string]$EC2ConfigSetPassword = "{{ec2config_set_password}}",
     [string]$EC2ConfigHandleUserData = "{{ec2config_handle_userdata}}",
@@ -21,6 +22,22 @@ Trap
 }
 $ErrorActionPreference = "Stop"
 
+
+$xml = [System.Xml.XmlDocument](Get-Content $EC2ConfigBundleFilePath)
+$xmlElement = $xml.get_DocumentElement()
+
+foreach ($element in $xmlElement.Property){
+    if ($element.Name -eq "AutoSysprep"){
+        $element.Value="No"
+    }elseif($element.Name -eq "SetRDPCertificate"){
+        $element.Value="No"
+    }elseif($element.Name -eq "SetPasswordAfterSysprep"){
+        $element.Value="No"
+    }
+}
+$xml.Save($EC2ConfigBundleFilePath)
+
+Write-Host "Successfully saved changes to the EC2 Service bundle config file."
 
 $xml = [System.Xml.XmlDocument](Get-Content $EC2ConfigSettingsFilePath)
 $xmlElement = $xml.get_DocumentElement()
@@ -43,27 +60,29 @@ $xml.Save($EC2ConfigSettingsFilePath)
 Write-Host "Successfully saved changes to the EC2 Service settings config file."
 
 $xml = [System.Xml.XmlDocument](Get-Content $SysPrepFilePath)
-$xmlElement = $xml.get_DocumentElement()
-$xmlElementToModify = $xmlElement.settings
 
-foreach( $element in $xml.unattend.settings.component ){
-    if( $element.name -eq "Microsoft-Windows-Shell-Setup" ){
-        $UserAccounts = $element.SelectSingleNode("./UserAccounts")
-        if( $UserAccounts ){
-            $AdminPassword = $UserAccounts.SelectSingleNode("./AdministratorPassword")
-            if( ! $AdminPassword ){
-                $AdminPassword = $xml.CreateElement("AdministratorPassword")
-                $APValueElement = $AdminPassword.AppendChild($xml.CreateElement("Value"));
-                $APPlainTextElement = $AdminPassword.AppendChild($xml.CreateElement("PlainText"));
-                $UserAccounts.AppendChild($AdminPassword)
-            }
-            Write-Host "Setting static admin password."
-            $AdminPassword.Value = "$SysPrepStaticPassword"
-            $AdminPassword.PlainText = "True"
-            break
-        }
+$xmlOobeSystemShellSetup = $($xml.unattend.settings | Where-Object {$_.pass -eq "oobeSystem"}).component | Where-Object {$_.name -eq "Microsoft-Windows-Shell-Setup"}
+if( $xmlOobeSystemShellSetup ){
+    $UserAccounts = $xmlOobeSystemShellSetup.ChildNodes | Where-Object {$_.Name -eq "UserAccounts"}
+    if( ! $UserAccounts ){
+        $UserAccounts = $xml.CreateElement("UserAccounts", $xmlOobeSystemShellSetup.NamespaceURI)
+        $xmlOobeSystemShellSetup.AppendChild($UserAccounts);
     }
+
+    $AdminPassword = $UserAccounts.ChildNodes | Where-Object {$_.Name -eq "AdministratorPassword"}
+    if( ! $AdminPassword ){
+        $AdminPassword = $xml.CreateElement("AdministratorPassword", $UserAccounts.NamespaceURI)
+        $APValueElement = $AdminPassword.AppendChild($xml.CreateElement("Value", $AdminPassword.NamespaceURI));
+        $APPlainTextElement = $AdminPassword.AppendChild($xml.CreateElement("PlainText", $AdminPassword.NamespaceURI));
+        $UserAccounts.AppendChild($AdminPassword)
+    }
+    Write-Host "Setting static admin password."
+    $AdminPassword.Value = "$SysPrepStaticPassword"
+    $AdminPassword.PlainText = "True"
+}else{
+    Throw "Failed to locate the OOBE Shell Setup component in '$SysPrepFilePath'."
 }
+
 $xml.Save($SysPrepFilePath)
 
 Write-Host "Successfully saved changes to the SysPrep config file."

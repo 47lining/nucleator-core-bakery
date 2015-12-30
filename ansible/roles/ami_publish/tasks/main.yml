@@ -6,14 +6,16 @@
     # all instances are in same region, simplify and determine once
 
 - name: Log hosts to image
-  debug: msg="{{targets}}"
+  debug:
+    msg: "{{targets}}"
 
 - name: Set instance region
   set_fact:
     instance_region: "{{hostvars[targets[0]]['ec2_region']}}"
 
 - name: Log instance region
-  debug: msg="{{instance_region}}"
+  debug:
+    msg: "{{instance_region}}"
 
 - name: Ensure instance is in a stopped state.
   shell: "aws ec2 describe-instances --instance-id {{hostvars[item]['ec2_id']}} --region {{instance_region}} --output json"
@@ -29,14 +31,16 @@
   with_items: targets
 
 - name: log ami creation output
-  debug: msg="{{ create_image }}"
+  debug:
+    msg: "{{ create_image }}"
 
 - name: get list of ami-ids from create-image output
   set_fact:
     ami_ids: "{{ create_image.results | map(attribute='stdout') | list | map('from_json') | map(attribute='ImageId') | list }}"
-  
+
 - name: log ami-ids
-  debug: msg="{{ ami_ids }}"
+  debug:
+    msg: "{{ ami_ids }}"
 
 - name: Wait for all AMIs to be available.
   shell: 'aws ec2 describe-images --image-id {{item}} --region {{instance_region}} --output json'
@@ -48,4 +52,4 @@
 
 - name: log ami info
   debug: msg="{{ ami_info }}"
-  
+

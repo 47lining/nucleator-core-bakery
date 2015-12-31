@@ -5,10 +5,14 @@ ec2config_set_password: 'Disabled'
 ec2config_handle_userdata: 'Enabled'
 ec2config_set_computer_name: 'Disabled'
 
+ec2config_bundle_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/Settings/BundleConfig.xml'
+
 sysprep_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/sysprep2008.xml'
 sysprep_process_path: 'C:/Windows/System32/Sysprep/Sysprep.exe'
 sysprep_process_arguments: '/generalize /oobe /shutdown /quiet'
 sysprep_static_password: ChangeM3!
-
-ec2config_bundle_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/Settings/BundleConfig.xml'
+sysprep_log_file_path: 'c:/sys_prep'
+sysprep_user_name: 'Build'
+sysprep_user_description: 'Nucleator {{sysprep_user_name}} User Account'
+sysprep_user_group: 'Administrators'
 

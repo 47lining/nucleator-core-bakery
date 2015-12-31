@@ -1,5 +1,18 @@
 ---
 
+- name: 'Process our create local user script.'
+  local_action: template src=create_local_user.ps1 dest=/tmp/create_local_user.ps1
+
+- name: 'Launch our create local user powershell script.'
+  script: '/tmp/create_local_user.ps1'
+  register: create_user_result
+
+- debug: var=create_user_result.stdout_lines
+  when: create_user_result.rc == 0
+
+- debug: var=create_user_result
+  when: create_user_result.rc != 0
+
 - name: 'Process our sysprep template'
   local_action: template src=ec2config_sysprep.ps1 dest=/tmp/ec2config_sysprep.ps1
 

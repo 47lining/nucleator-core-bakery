@@ -2,13 +2,13 @@
 Try
 {
     $SysPrepTempPath = "{{sysprep_temp_path}}"
-    $LogFilePath = "$SysPrepTempPath/create_local_user.log"
     $UserName = "{{sysprep_user_name}}"
     $UserPassword = "{{sysprep_static_password}}"
     $UserDescription = "{{sysprep_user_description}}"
     $UserGroup = "{{sysprep_user_group}}"
 
-    New-Item -ItemType Directory -Force -Path "$SysPrepTempPath"
+    $LogFilePath = "$SysPrepTempPath/logs/create_local_user.log"
+    New-Item -ItemType Directory -Force -Path "$SysPrepTempPath/logs"
     Start-Transcript -Path "$LogFilePath" -Append -Force
 
     $ComputerName = "$env:COMPUTERNAME"

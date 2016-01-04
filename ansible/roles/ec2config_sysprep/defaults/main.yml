@@ -1,15 +1,16 @@
 ---
 
 ec2config_settings_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/Settings/Config.xml'
+ec2config_bundle_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/Settings/BundleConfig.xml'
+ec2config_sysprep_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/sysprep2008.xml'
 ec2config_set_password: 'Disabled'
 ec2config_handle_userdata: 'Enabled'
-ec2config_set_computer_name: 'Disabled'
+ec2config_set_computer_name: 'Enabled'
+ec2config_dynamic_boot_volume_size: 'Enabled'
+ec2config_event_log: 'Disabled'
+ec2config_process_path: 'C:/Program Files/Amazon/Ec2ConfigService/ec2config.exe'
+ec2config_process_arguments: '-sysprep'
 
-ec2config_bundle_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/Settings/BundleConfig.xml'
-
-sysprep_file_path: 'C:/Program Files/Amazon/Ec2ConfigService/sysprep2008.xml'
-sysprep_process_path: 'C:/Windows/System32/Sysprep/Sysprep.exe'
-sysprep_process_arguments: '/generalize /oobe /shutdown /quiet'
 sysprep_static_password: ChangeM3!
 sysprep_temp_path: 'c:/sys_prep'
 sysprep_user_name: 'Build'

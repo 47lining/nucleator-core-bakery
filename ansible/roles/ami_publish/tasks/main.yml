@@ -45,7 +45,7 @@
 - name: Wait for all AMIs to be available.
   shell: 'aws ec2 describe-images --image-id {{item}} --region {{instance_region}} --output json'
   register: ami_info
-  until: 'ami_info.rc == 0 and ami_info.stdout.lower().find(''"state": "available"'') > -1'
+  until: 'ami_info.rc != 0 or (ami_info.rc == 0 and ami_info.stdout.lower().find(''"state": "available"'') > -1)'
   retries: "{{instance_state_check_retries}}"
   delay: "{{instance_state_check_delay}}"
   with_items: ami_ids

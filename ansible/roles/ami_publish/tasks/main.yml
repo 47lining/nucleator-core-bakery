@@ -51,5 +51,6 @@
   with_items: ami_ids
 
 - name: log ami info
-  debug: msg="{{ ami_info }}"
+  debug:
+    msg: "{{ ami_info }}"
 

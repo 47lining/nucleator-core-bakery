@@ -20,10 +20,10 @@ Try
     $ADSIUserExists = ($ADSIComputerUsers -contains "$UserName")
     if( ! $ADSIUserExists ){
         $User = $ADSIComputer.Create('User',$UserName)
-        Write-Output "`tNope, creating user '$UserName'..."
+        Write-Output "`tNo, creating user '$UserName'..."
     }else{
         $User = [ADSI]"WinNT://$ComputerName/$UserName,user"
-        Write-Output "`tYep, user '$UserName' already exists!"
+        Write-Output "`tYes, user '$UserName' already exists!"
     }
 
     $User.SetPassword($UserPassword)
@@ -38,10 +38,12 @@ Try
     if( ! $ADSIUserIsInGroup ){
         $ADSIUserGroup = [ADSI]"WinNT://$ComputerName/$UserGroup,group"
         $ADSIUserGroup.Add($User.Path)
-        Write-Output "`tNope, adding user '$UserName' to the '$UserGroup' group..."
+        Write-Output "`tNo, adding user '$UserName' to the '$UserGroup' group..."
     }else{
-        Write-Output "`tYep, '$UserName' is already a member of the '$UserGroup' group!"
+        Write-Output "`tYes, '$UserName' is already a member of the '$UserGroup' group!"
     }
+
+    Write-Output "That's a wrap!"
 }
 Catch
 {

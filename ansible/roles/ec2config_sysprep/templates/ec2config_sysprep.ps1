@@ -13,6 +13,9 @@ Try
     $EC2ConfigProcessPath = "{{ec2config_process_path}}"
     $EC2ConfigProcessArguments = "{{ec2config_process_arguments}}"
     $EC2ConfigStaticPassword = "{{sysprep_static_password}}"
+    $EC2ConfigBundleAutoSysprep = "{{ec2config_bundle_auto_sysprep}}"
+    $EC2ConfigBundleSetRDPCertificate = "{{ec2config_bundle_set_rdp_certificate}}"
+    $EC2ConfigBundleSetPasswordAfterSysprep = "{{ec2config_bundle_set_password_after_sysprep}}"
 
     $LogFilePath = "$SysPrepTempPath/logs/ec2config_sysprep.log"
     New-Item -ItemType Directory -Force -Path "$SysPrepTempPath/logs"
@@ -23,16 +26,19 @@ Try
 
     foreach ($element in $xmlElement.Property){
         if ($element.Name -eq "AutoSysprep"){
-            $element.Value="No"
+            Write-Output "Setting 'AutoSysprep' to '$EC2ConfigBundleAutoSysprep'."
+            $element.Value="$EC2ConfigBundleAutoSysprep"
         }elseif($element.Name -eq "SetRDPCertificate"){
-            $element.Value="No"
+            Write-Output "Setting 'SetRDPCertificate' to '$EC2ConfigBundleSetRDPCertificate'."
+            $element.Value="$EC2ConfigBundleSetRDPCertificate"
         }elseif($element.Name -eq "SetPasswordAfterSysprep"){
-            $element.Value="No"
+            Write-Output "Setting 'SetPasswordAfterSysprep' to '$EC2ConfigBundleSetPasswordAfterSysprep'."
+            $element.Value="$EC2ConfigBundleSetPasswordAfterSysprep"
         }
     }
     $xml.Save($EC2ConfigBundleFilePath)
 
-    Write-Output "Successfully saved changes to the EC2 Service bundle config file."
+    Write-Output "Successfully saved changes to '$EC2ConfigBundleFilePath'."
 
     $xml = [System.Xml.XmlDocument](Get-Content "$EC2ConfigSettingsFilePath")
     $xmlElement = $xml.get_DocumentElement()
@@ -58,7 +64,7 @@ Try
     }
     $xml.Save($EC2ConfigSettingsFilePath)
 
-    Write-Output "Successfully saved changes to the EC2 Service settings config file."
+    Write-Output "Successfully saved changes to '$EC2ConfigSettingsFilePath'."
 
     $xml = [System.Xml.XmlDocument](Get-Content "$EC2ConfigSysprepFilePath")
 
@@ -86,7 +92,7 @@ Try
 
     $xml.Save($EC2ConfigSysprepFilePath)
 
-    Write-Output "Successfully saved changes to the SysPrep config file."
+    Write-Output "Successfully saved changes to '$EC2ConfigSysprepFilePath'."
 
     $task_name = "SysPrepShutdownTask_{0}" -f $(Get-Date -f MM-dd-yyyy_HH_mm_ss)
     $task_start_time = [datetime]::Now.AddSeconds(10)
@@ -97,6 +103,8 @@ Try
     $task_input_object = New-ScheduledTask -Action $task_action -Trigger $task_trigger -Principal $task_principal -Settings $task_settings
 
     Register-ScheduledTask -TaskName $task_name -InputObject $task_input_object -Force
+
+    Write-Output "Successfully scheduled our sysprep shutdown task, that's a wrap!"
 
 }
 Catch

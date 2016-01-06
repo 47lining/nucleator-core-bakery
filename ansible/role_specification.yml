@@ -141,6 +141,7 @@ role_specification:
                 - "ec2:DescribeInstances"
                 - "ec2:DescribeAddresses"
                 - "ec2:DisassociateAddress"
+                - "ec2:ReleaseAddress"
                 - "ec2:TerminateInstances"
                 - "ec2:RevokeSecurityGroupEgress"
                 - "ec2:RevokeSecurityGroupIngress"

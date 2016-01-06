@@ -68,6 +68,8 @@ class StacksetCommand(Command):
         command_delete.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
         command_delete.add_argument("--cage", required=True, help="Name of cage from nucleator config")
         command_delete.add_argument("--name", required=True, help="The name of the bakery Stackset instance containing the ec2 instance to delete")
+        command_delete.add_argument("--group", required=True, help="The Nucleator Group, i.e. type of instance, to bake within specified Stackset instance.")
+
 
     def provision(self, **kwargs):
         """
@@ -273,11 +275,10 @@ class StacksetCommand(Command):
 
     def delete(self, **kwargs):
         """
-        This command publishes the instance to an AMI
+        This command deletes a bakery stackset
         """
-        cli = Command.get_cli(kwargs)
-
-        raise ValueError("Sorry, bakery delete is not yet implemented")
+        kwargs["bakery_deleting"]=True
+        return self.provision(**kwargs)
 
 # Create the singleton for auto-discovery
 command = StacksetCommand()

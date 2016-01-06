@@ -113,6 +113,9 @@ class StacksetCommand(Command):
         extra_vars["cli_stackset_name"] = self.name
         extra_vars["cli_stackset_instance_name"] = namespaced_service_name
 
+
+        extra_vars["bakery_deleting"]=kwargs.get("bakery_deleting", False)
+
         command_list = []
         command_list.append("account")
         command_list.append("cage")

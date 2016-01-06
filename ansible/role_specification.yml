@@ -138,6 +138,9 @@ role_specification:
               Resource: arn:aws:s3:::*
             - Effect: Allow
               Action:
+                - "ec2:DescribeInstances"
+                - "ec2:DescribeAddresses"
+                - "ec2:DisassociateAddress"
                 - "ec2:TerminateInstances"
                 - "ec2:RevokeSecurityGroupEgress"
                 - "ec2:RevokeSecurityGroupIngress"

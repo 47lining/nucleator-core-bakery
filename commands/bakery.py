@@ -11,6 +11,7 @@ class StacksetCommand(Command):
     name = "bakery"
     service_role_name = "NucleatorBakeryServiceRunner"
     im_role_name = "NucleatorBakeryInventoryManager"
+    deleter_role_name = "NucleatorBakeryDeleter"
 
     def parser_init(self, subparsers):
         """
@@ -117,14 +118,17 @@ class StacksetCommand(Command):
         command_list.append("cage")
         command_list.append(self.name)
 
-        inventory_manager_rolename = self.im_role_name
+        rolename = self.im_role_name
 
         playbook = "%s_provision.yml" % self.name
+        if extra_vars["bakery_deleting"]:
+            playbook = "bakery_delete.yml"
+            rolename = self.deleter_role_name
 
         cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None))
 
         rc = cli.safe_playbook(self.get_command_playbook(playbook),
-                                 inventory_manager_rolename,
+                                 rolename,
                                  is_static=True, # dynamic inventory not required
                                  **extra_vars
         )

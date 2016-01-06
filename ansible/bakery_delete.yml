@@ -10,7 +10,7 @@
   roles:
     - config
     - siteconfig
-    - bakery_provision
+    - "{{bakery_group}}_provision"
   vars:
     cage_name: "{{cage_name}}"
     customer_name: "{{customer_name}}"

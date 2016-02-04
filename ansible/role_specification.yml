@@ -79,6 +79,7 @@ role_specification:
                 - "ec2:DescribeSubnets"
                 - "ec2:DescribeImages"
                 - "ec2:DescribeVpcs"
+                - "ec2:disassociateAddress"
               Resource: '*'
             - Effect: Allow
               Action:

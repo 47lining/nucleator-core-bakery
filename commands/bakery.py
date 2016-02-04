@@ -30,7 +30,7 @@ class StacksetCommand(Command):
         command_provision.add_argument("--ami-id", required=False, help="Use the ami with this id instead of that specified by the Nucleator Group role.  The specified ami must reside in the same AWS Region as the specified Nucleator cage.")
         command_provision.add_argument("--ami-name", required=False, help="Use the ami with this name instead of that specified by the Nucleator Group role.  The specified ami must reside in the same AWS Region as the specified Nucleator cage.")
         command_provision.add_argument("--name", required=False, default="singleton", help="The name to apply to the resulting bakery Stackset instance")
-        command_provision.add_argument("--group", required=True, help="The Nucleator Group, i.e. type of instance, that to provision for baking.")
+        command_provision.add_argument("--group", required=True, help="The Nucleator Group, name of role to provision for baking.")
 
         #
         # configure subcommand
@@ -38,8 +38,8 @@ class StacksetCommand(Command):
         command_configure=command_subparsers.add_parser('configure', help="[re]configure a provisioned nucleator bakery stackset")
         command_configure.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
         command_configure.add_argument("--cage", required=False, default="build", help="Name of cage from nucleator config (default: build)")
-        command_configure.add_argument("--name", required=False, default="singleton", help="The name of the bakery Stackset instance to configure")
-        command_configure.add_argument("--group", required=True, help="The Nucleator Group, i.e. type of instance, to bake within specified Stackset instance.")
+        command_configure.add_argument("--name", required=False, default="singleton", help="The name of the bakery stackset instance to configure")
+        command_configure.add_argument("--group", required=True, help="The Nucleator Group, name of role to configure the specified stackset instance.")
 
         # potentially useful for baking ad-hoc instances outside of a bakery Stackset?
         # command_configure.add_argument("--instance-id", required=False, help="The ID of the running instance to configure")
@@ -52,7 +52,7 @@ class StacksetCommand(Command):
         command_publish.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
         command_publish.add_argument("--cage", required=False, default="build", help="Name of cage from nucleator config")
         command_publish.add_argument("--name", required=False, default="singleton", help="The name of the bakery Stackset instance containing the ec2 instance to publish")
-        command_publish.add_argument("--group", required=True, help="The Nucleator Group to publish")
+        command_publish.add_argument("--group", required=True, help="The Nucleator Group, name of role to publish")
         # TODO accept multiple regions, publish AMI to each one.
         command_publish.add_argument("--ami-region", required=False, help="Name of region (default is the region in which the cage lives")
         command_publish.add_argument("--ami-name", required=True, help="The Name tag to give the created AMI")
@@ -69,7 +69,7 @@ class StacksetCommand(Command):
         command_delete.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
         command_delete.add_argument("--cage", required=True, help="Name of cage from nucleator config")
         command_delete.add_argument("--name", required=True, help="The name of the bakery Stackset instance containing the ec2 instance to delete")
-        command_delete.add_argument("--group", required=True, help="The Nucleator Group, i.e. type of instance, to bake within specified Stackset instance.")
+        command_delete.add_argument("--group", required=True, help="The Nucleator Group, name of role to delete stackset instance.")
 
 
     def provision(self, **kwargs):

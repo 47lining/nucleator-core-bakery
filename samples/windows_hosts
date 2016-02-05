@@ -1,9 +1,0 @@
-[windows]
-52.90.166.41
-
-[windows:vars]
-ansible_ssh_user = "<windows-user>"
-ansible_ssh_pass = "<windows-password>"
-ansible_ssh_port = 5986
-ansible_connection = winrm
-

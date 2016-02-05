@@ -116,6 +116,58 @@
                 }
             }
         },
+        "Instance" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "InstanceType": { "Ref" : "InstanceType" },
+                "IamInstanceProfile" : { "Ref" : "InstanceProfile" },
+                "ImageId" : {
+                    "Fn::If": [
+                        "UseReferenceAmi",
+                        { "Fn::FindInMap": [ "AWSRegionToAMI", { "Ref": "AWS::Region" }, "id" ] },
+                        { "Ref": "AmiId" }
+                    ]
+                },
+		"SubnetId" : { "Ref" : "PublicSubnet1Id" },
+		"SecurityGroupIds": [
+		    {
+			"Ref": "InstanceSecurityGroup"
+		    }
+		],
+                "BlockDeviceMappings" : [
+                    {
+			"DeviceName" : "/dev/sda1",
+			"Ebs" : {
+                            "VolumeSize" : "{{instance_root_volume_size}}",
+			    "VolumeType" : "{{instance_root_volume_type}}"
+			}
+                    }
+                ],
+		"Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Ref" : "InstanceName" }
+                    },
+                    {
+                        "Key": "NucleatorGroup",
+                        "Value": { "Ref" : "ServiceName" }
+                    },
+                    {{ nucleator_common_tags | to_json_fragment }}
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "\r\n",
+                            [
+                                "<powershell>",
+                                "$script_path = ((Get-Item $env:temp).FullName + \"\\{{connect_scriptname}}\"); Copy-S3Object -BucketName \"{{connect_bucketname}}\" -Key \"{{connect_keyname}}\" -LocalFile \"$script_path\"; $ps_args = \"-noexit\", \"-ExecutionPolicy Bypass\", \"-File \"\"$script_path\"\"\"; Start-Process powershell.exe -ArgumentList $ps_args -NoNewWindow -Wait; Remove-Item -Path \"$script_path\" -Force",
+                                "</powershell>"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
         "InstanceIpAddress": {
             "Type": "AWS::EC2::EIP",
             "Properties": {
@@ -132,59 +184,50 @@
                     ]
                 },
                 "InstanceId": {
-                    "Fn::GetAtt": [
-                        "Instance",
-                        "Outputs.InstanceId"
-                    ]
-                }
+		    "Ref": "Instance"
+		}
             }
         },
-        "Instance" : {
-           "Type" : "AWS::EC2::Instance",
-           "Properties" : {
-                "InstanceType": { "Ref" : "InstanceType" },
-                "IamInstanceProfile" : { "Ref" : "InstanceProfile" },
-                "ImageId" : {
-                    "Fn::If": [
-                        "UseReferenceAmi",
-                        { "Fn::FindInMap": [ "AWSRegionToAMI", { "Ref": "AWS::Region" }, "id" ] },
-                        { "Ref": "AmiId" }
-                    ]
+	"InstanceSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable winrm access to Instance",
+                "VpcId": {
+                    "Ref": "VpcId"
                 },
-                "SubnetId" : { "Ref" : "PublicSubnet1Id" },
-                "BlockDeviceMappings" : [
-                    {
-                       "DeviceName" : "/dev/sda1",
-                       "Ebs" : {
-                            "VolumeSize" : "{{instance_root_volume_size}}"
-                       }
-                    }
+                "SecurityGroupIngress": [
+		    {% for entry in instance_cidr_whitelist_ingress_rules %}
+		    {% set outer_loop = loop %}
+		    {% for whitelist_cidr in NUCLEATOR_CAGE_CIDR_WHITELIST %}
+		    {
+			"CidrIp": "{{whitelist_cidr}}",
+			{{entry|to_json_fragment}}
+		    }{{"" if loop.last and outer_loop.last else ","}}
+		    {% endfor %}
+		    {% endfor %}
                 ],
-               "Tags": [
-                   {
+                "SecurityGroupEgress": [
+		    {{instance_egress_rules|to_json_fragment}}
+		],
+                "Tags": [
+                    {
                         "Key": "Name",
-                        "Value": { "Ref" : "InstanceName" }
-                    },
-                    {
-                        "Key": "NucleatorGroup",
-                        "Value": { "Ref" : "ServiceName" }
-                    },
-                    {{ nucleator_common_tags | to_json_fragment }}
-                ],
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "\r\n",
-                            [
-                                "<powershell>",
-                                "$script_path = ((Get-Item $env:temp).FullName + \"\\{{userdata_script_name}}\"); Copy-S3Object -BucketName \"{{user_data_script_s3_bucket}}\" -Key \"{{user_data_script_s3_key}}\" -LocalFile \"$script_path\"; $ps_args = \"-noexit\", \"-ExecutionPolicy Bypass\", \"-File \"\"$script_path\"\"\"; Start-Process powershell.exe -ArgumentList $ps_args -NoNewWindow -Wait; Remove-Item -Path \"$script_path\" -Force",
-                                "</powershell>"
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+				    "security",
+                                    "{{stackset_instance_name}}",
+                                    "unresolvable"
+                                ]
                             ]
-                        ]
-                    }
-                }
-            }
-         }
+                        }
+                    },
+		    { "Key": "NucleatorGroup", "Value": "{{bakery_group}}" },
+    		    {{ nucleator_common_tags | to_json_fragment }}
+                ]
+	    }
+	}
     },
     "Outputs": {
         "InstanceId" : {

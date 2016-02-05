@@ -1,5 +1,8 @@
 ---
 
+match_group: "MATCH_NUCLEATORGROUP__example_windows"
+match_group_file: '{{ nucleator_configuration_dir | osPathJoin("inventory", "group_vars", match_group) }}'
+
 stackset_name: "{{cli_stackset_name}}"
 stackset_instance_name: "{{cli_stackset_instance_name}}"
 

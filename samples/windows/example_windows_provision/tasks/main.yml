@@ -26,7 +26,7 @@
 
 - name: "set stackset name"
   set_fact:
-    stackset_stack_name: "stackset-{{stackset_name}}-{{stackset_instance_name}}-{{cage_name}}-{{account_name}}-{{customer_name}}"
+    stackset_stack_name: "stackset-{{stackset_instance_name}}"
     stackset_template: "{{ cloudformation_template_instantiation_dir | expanduser }}/{{customer_name}}/{{cage_name}}/stackset/{{stackset_name}}/{{stackset_instance_name}}{{bakery_group}}.json"
 
 - name: Set credentials variable to desired role
@@ -51,7 +51,8 @@
 
 # The bad news is the set_fact doesn't set it :(
 - name: What did we get?
-  debug: msg="ami_id = {{ami_id}}"
+  debug:
+    msg: "ami_id = {{ami_id}}"
 
 - name: "provision stackset via cloudformation"
   connection: local
@@ -90,3 +91,6 @@
 - name: show cloudformation output parameters
   action: debug msg="{{create_stackset_stack['stack_outputs']}}"
   when: bakery_deleting is not defined or not bakery_deleting|bool
+
+- name: move groupvars file into place
+  template: src="{{match_group}}" dest="{{match_group_file}}"

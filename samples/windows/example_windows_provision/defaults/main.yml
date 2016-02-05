@@ -2,17 +2,17 @@
 
 # Defaults
 
+example_windows_static_user: Administrator
+example_windows_static_password: CrP4ubQJGRH
+
 # role arguments
-service_name: bakery
 instance_type: t2.micro
 region: us-east-1
 ami_id: "must-set-this"
 service_role: "NucleatorBakeryServiceRunner"
 
-# group_vars/all
-keypair_name: nucleator
-
 # set by upstream playbooks/roles
+keypair_name: None
 cage_name: None
 
 # determined by nucleator, from cage name, as roles vars

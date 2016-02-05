@@ -1,2 +1,7 @@
 ---
 
+target_platform: 'windows'
+target_architecture: 'x86_64'
+remote_user: 'Administrator'
+display_facts: false
+display_bootstrap_output: true

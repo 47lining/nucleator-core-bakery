@@ -2,4 +2,28 @@
 - name: Display the facts for our host
   debug:
     var: hostvars[inventory_hostname]
-  when: hostvars is defined and hostvars[inventory_hostname] is defined
+  when: display_facts and hostvars is defined and hostvars[inventory_hostname] is defined
+
+- name: "Get the path to the temp folder."
+  raw: 'powershell.exe -nologo -noprofile -command "[System.IO.Path]::GetTempPath().ToLower()"'
+  register:  get_temp_path
+
+- name: 'Ensure that the .Net Framework Core is installed.'
+  win_feature:
+    name: "NET-Framework-Core"
+    state: present
+
+- name: 'Process our bootstrapping template'
+  local_action: template src=bootstrap_server.ps1 dest=/tmp/bootstrap_server.ps1
+
+- name: 'Launch our bootstrapping powershell script.'
+  script: '/tmp/bootstrap_server.ps1'
+  register: bootstrap_result
+
+- debug: var=bootstrap_result.stdout_lines
+  when: bootstrap_result.rc == 0
+
+- debug: var=bootstrap_result
+  when: bootstrap_result.rc != 0
+
+

@@ -21,13 +21,6 @@
   roles:
     - nucleatorgroups
 
-- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
-  roles:
-    # _publish play covers and runs on all instances to be published,
-    # covers tasks required to prepare instance or publishing
-    # (e.g. sysprep, clean shutdown, hostname cleansing, creds cleanup, etc.)
-    - "{{bakery_group}}_prepare_instances_for_publishing"
-
 - hosts: localhost
   gather_facts: False
   roles:

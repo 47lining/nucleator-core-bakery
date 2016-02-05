@@ -23,13 +23,5 @@
     - nucleatorgroups
 
 - hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
-  gather_facts: false
-  roles:
-    # _configure_pre play covers any pre-requisite tasks to establish
-    # comms with instances.
-    # TODO: valdate that scope of activity covers all required hosts
-    - "{{bakery_group}}_configure_pre"
-
-- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
   roles:
     - "{{bakery_group}}_configure"

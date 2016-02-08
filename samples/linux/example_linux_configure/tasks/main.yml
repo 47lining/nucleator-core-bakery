@@ -12,7 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
+- name: Display the facts for our host
+  debug:
+    var: hostvars[inventory_hostname]
+  when: display_facts and hostvars is defined and hostvars[inventory_hostname] is defined
 
-dependencies:
-  - { role: cage_provision }
-  - { role: publish_stackset_templates }
+- name: 'Process our bootstrapping template'
+  local_action: template src=bootstrap_server.sh dest=/tmp/bootstrap_server.sh
+
+- name: 'Launch our bootstrapping shell script.'
+  script: '/tmp/bootstrap_server.sh'
+  register: bootstrap_result
+
+- debug: var=bootstrap_result.stdout_lines
+  when: bootstrap_result.rc == 0
+
+- debug: var=bootstrap_result
+  when: bootstrap_result.rc != 0
+
+

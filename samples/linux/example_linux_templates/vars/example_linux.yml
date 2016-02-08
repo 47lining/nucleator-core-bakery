@@ -20,26 +20,22 @@ instance_root_volume_type: gp2 # General Purpose (SSD)
 
 map_aws_region_to_ami:
   us-east-1:
-    id: ami-e171098b
+    id: ami-66b6c60c
   us-west-1:
-    id: ami-8e345aee
+    id: ami-ede78b8d
   us-west-2:
-    id: ami-56544537
+    id: ami-31342050
   eu-west-1:
-    id: ami-8004dcf3
+    id: ami-54e03f27
 
-connect_scriptname: "example_windows_provision.ps1"
+connect_scriptname: "example_linux_provision.sh"
 connect_bucketname: "{{ account_setup_stack['stack_outputs']['TemplateBucketName'] }}"
 connect_keyname: "{{customer_name}}/{{cage_name}}/stackset/{{stackset_name}}/{{stackset_instance_name}}{{connect_scriptname}}"
 
-provision_user: "Administrator"
-provision_user_static_password: "CrP4ubQJGRH"
-provision_cert_valid_days: 365
-
 instance_cidr_whitelist_ingress_rules:
   - IpProtocol: tcp
-    FromPort: 5986
-    ToPort: 5986
+    FromPort: 22
+    ToPort: 22
   - IpProtocol: tcp
     FromPort: 6080
     ToPort: 6080

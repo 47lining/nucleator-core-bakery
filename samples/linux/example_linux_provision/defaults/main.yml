@@ -13,6 +13,24 @@
 # limitations under the License.
 ---
 
-dependencies:
-  - { role: cage_provision }
-  - { role: publish_stackset_templates }
+# Defaults
+
+# role arguments
+instance_type: t2.micro
+region: us-east-1
+ami_id: "must-set-this"
+service_role: "NucleatorBakeryServiceRunner"
+
+# set by upstream playbooks/roles
+keypair_name: None
+cage_name: None
+
+# determined by nucleator, from cage name, as roles vars
+vpc_id: None
+nat_security_group_id: None
+bastion_security_group_id: None
+public_subnet1_id: None
+public_subnet2_id: None
+private_subnet1_id: None
+private_subnet2_id: None
+database_subnet_group_id: None

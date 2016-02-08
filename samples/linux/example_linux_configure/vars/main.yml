@@ -13,6 +13,8 @@
 # limitations under the License.
 ---
 
-dependencies:
-  - { role: cage_provision }
-  - { role: publish_stackset_templates }
+target_platform: 'linux'
+target_architecture: 'x86_64'
+remote_user: 'ec2-user'
+display_facts: false
+display_bootstrap_output: true

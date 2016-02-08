@@ -1,3 +1,16 @@
+# Copyright 2016 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from nucleator.cli.utils import ValidateCustomerAction
 from nucleator.cli.command import Command
@@ -31,6 +44,7 @@ class StacksetCommand(Command):
         command_provision.add_argument("--ami-name", required=False, help="Use the ami with this name instead of that specified by the Nucleator Group role.  The specified ami must reside in the same AWS Region as the specified Nucleator cage.")
         command_provision.add_argument("--name", required=False, default="singleton", help="The name to apply to the resulting bakery Stackset instance")
         command_provision.add_argument("--group", required=True, help="The Nucleator Group, name of role to provision for baking.")
+        command_provision.add_argument("--keypair-name", required=False, help="Name of the keypair to put on the instance.")
 
         #
         # configure subcommand
@@ -88,6 +102,7 @@ class StacksetCommand(Command):
 
         ami_id = kwargs.get("ami_id", "None")
         ami_name = kwargs.get("ami_name", "None")
+        keypair_name = kwargs.get("keypair_name", "None")
 
         stackset_instance_name = kwargs.get("name", None)
         if stackset_instance_name is None:
@@ -104,6 +119,7 @@ class StacksetCommand(Command):
             "ami_name": ami_name,
             "bakery_group": bakery_group,
             "verbosity": kwargs.get("verbosity", None),
+            "keypair_name": keypair_name
         }
 
         extra_vars["service_name"] = bakery_group

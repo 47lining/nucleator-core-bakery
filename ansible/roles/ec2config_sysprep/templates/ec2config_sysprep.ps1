@@ -10,6 +10,7 @@ Try
     $EC2ConfigSetComputerName = "{{ec2config_set_computer_name}}"
     $EC2ConfigDynamicBootVolumeSize = "{{ec2config_dynamic_boot_volume_size}}"
     $EC2ConfigEventLog = "{{ec2config_event_log}}"
+    $EC2ConfigCloudWatchPlugin = "{{ec2config_cloudwatch_plugin}}"
     $EC2ConfigProcessPath = "{{ec2config_process_path}}"
     $EC2ConfigProcessArguments = "{{ec2config_process_arguments}}"
     $EC2ConfigStaticPassword = "{{sysprep_static_password}}"
@@ -60,6 +61,9 @@ Try
         }elseif($element.name -eq "Ec2EventLog"){
             Write-Output "Setting 'Ec2EventLog' to '$EC2ConfigEventLog'."
             $element.State="$EC2ConfigEventLog"
+        }elseif($element.name -eq "AWS.EC2.Windows.CloudWatch.PlugIn"){
+            Write-Output "Setting 'AWS.EC2.Windows.CloudWatch.PlugIn' to '$EC2ConfigCloudWatchPlugin'."
+            $element.State="$EC2ConfigCloudWatchPlugin"
         }
     }
     $xml.Save($EC2ConfigSettingsFilePath)

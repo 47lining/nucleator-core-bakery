@@ -134,15 +134,6 @@
         			"Ref": "InstanceSecurityGroup"
         		    }
         		],
-                "BlockDeviceMappings" : [
-                    {
-        			"DeviceName" : "/dev/sda1",
-        			"Ebs" : {
-                                    "VolumeSize" : "{{instance_root_volume_size}}",
-        			    "VolumeType" : "{{instance_root_volume_type}}"
-        			}
-                    }
-                ],
                 "KeyName": {
                     "Ref": "KeypairName"
                 },

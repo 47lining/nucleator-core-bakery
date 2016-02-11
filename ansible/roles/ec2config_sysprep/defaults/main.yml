@@ -17,11 +17,11 @@ ec2config_process_path: 'C:/Program Files/Amazon/Ec2ConfigService/ec2config.exe'
 ec2config_process_arguments: '-sysprep'
 
 sysprep_static_password: ChangeM3!
-sysprep_temp_path: 'c:/sys_prep'
 sysprep_user_name: 'Build'
 sysprep_user_description: 'Nucleator {{sysprep_user_name}} User Account'
 sysprep_user_group: 'Administrators'
 sysprep_computer_name: ''
+sysprep_devops_base_folder: 'devops'
 
 
 

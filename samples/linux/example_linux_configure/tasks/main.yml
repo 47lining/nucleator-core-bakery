@@ -1,0 +1,33 @@
+# Copyright 2016 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- name: Display the facts for our host
+  debug:
+    var: hostvars[inventory_hostname]
+  when: display_facts and hostvars is defined and hostvars[inventory_hostname] is defined
+
+- name: 'Process our bootstrapping template'
+  local_action: template src=bootstrap_server.sh dest=/tmp/bootstrap_server.sh
+
+- name: 'Launch our bootstrapping shell script.'
+  script: '/tmp/bootstrap_server.sh'
+  register: bootstrap_result
+
+- debug: var=bootstrap_result.stdout_lines
+  when: bootstrap_result.rc == 0
+
+- debug: var=bootstrap_result
+  when: bootstrap_result.rc != 0
+
+

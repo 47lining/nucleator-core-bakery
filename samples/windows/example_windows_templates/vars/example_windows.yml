@@ -1,0 +1,54 @@
+# Copyright 2016 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+instance_type: t2.medium
+
+instance_root_volume_size: 128 # GigaBytes
+instance_root_volume_type: gp2 # General Purpose (SSD)
+
+map_aws_region_to_ami:
+  us-east-1:
+    id: ami-e171098b
+  us-west-1:
+    id: ami-8e345aee
+  us-west-2:
+    id: ami-56544537
+  eu-west-1:
+    id: ami-8004dcf3
+
+connect_scriptname: "example_windows_provision.ps1"
+connect_bucketname: "{{ account_setup_stack['stack_outputs']['TemplateBucketName'] }}"
+connect_keyname: "{{customer_name}}/{{cage_name}}/stackset/{{stackset_name}}/{{stackset_instance_name}}{{connect_scriptname}}"
+
+provision_user: "Administrator"
+provision_user_static_password: "CrP4ubQJGRH"
+provision_cert_valid_days: 365
+
+instance_cidr_whitelist_ingress_rules:
+  - IpProtocol: tcp
+    FromPort: 5986
+    ToPort: 5986
+  - IpProtocol: tcp
+    FromPort: 6080
+    ToPort: 6080
+  - IpProtocol: tcp
+    FromPort: 3389
+    ToPort: 3389
+
+instance_egress_rules:
+  - IpProtocol: -1
+    FromPort: 0
+    ToPort: 65535
+    CidrIp: 0.0.0.0/0

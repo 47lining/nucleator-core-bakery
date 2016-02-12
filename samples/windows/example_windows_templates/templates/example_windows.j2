@@ -1,0 +1,239 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Create an AMI bakery baseline",
+    "Parameters": {
+        "CustomerDomain": {
+            "Description": "Name of the Customer Domain for use in instance tagging",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "CustomerName": {
+            "Description": "Name of the Customer for use in instance tagging",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "AccountName": {
+            "Description": "Name of the Account for use in instance tagging",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "CageName": {
+            "Description": "Name of the Cage for use in instance tagging",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "ServiceName": {
+            "Description": "Name of the service",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9_-]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters, hyphens and underscores."
+        },
+        "InstanceName": {
+            "Description": "Name of the instance",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255"
+        },
+        "VpcId": {
+            "Type": "String",
+            "Description": "ID of the Cage's Virtual Private Cloud, used to create a security group for the database instances."
+        },
+        "NatSecurityGroupId": {
+            "Type": "String",
+            "Description": "SecurityGroupId for NAT to the public subnet.  NAT Ingress rules will be added to cover traffic from database instances."
+        },
+        "BastionSecurityGroupId": {
+            "Type": "String",
+            "Description": "SecurityGroupId for bastion hosts.  SSH traffic from these hosts to beanstalk and database hosts will be permitted."
+        },
+        "PublicSubnet1Id": {
+            "Type": "String",
+            "Description": "Public Subnet 1 ID.  Public ELBs will be launched here."
+        },
+        "PublicSubnet2Id": {
+            "Type": "String",
+            "Description": "Public Subnet 2 ID.  Public ELBs will be launched here."
+        },
+        "PrivateSubnet1Id": {
+            "Type": "String",
+            "Description": "Private Subnet 1 ID.  Beanstalk instances and private ELBs will be launched here."
+        },
+        "PrivateSubnet2Id": {
+            "Type": "String",
+            "Description": "Private Subnet 1 ID.  Beanstalk instances and private ELBs will be launched here."
+        },
+        "KeypairName": {
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to all resulting instances",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
+        },
+        "AmiId": {
+            "Type": "String",
+            "Description": "Id of the AMI to use to launch instances for frontproxy"
+        },
+        "InstanceType": {
+            "Description": "Instance type for instances",
+            "Type": "String",
+            "Default": "{{default_ec2_instance_type}}",
+            "AllowedValues": {{ supported_ec2_instance_types|to_json }},
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        },
+        "ServiceRole": {
+            "Type": "CommaDelimitedList",
+            "Description": "String including comma-separated list of Role name(s) to use to establish an Instance Profile to associate with the instance"
+        }
+    },
+    "Mappings": {
+        "AWSRegionToAMI": {{ map_aws_region_to_ami|to_json }}
+    },
+    "Conditions": {
+        "UseReferenceAmi": {"Fn::Equals": [{"Ref": "AmiId"}, "None"]}
+    },
+    "Resources": {
+        "InstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": {
+                    "Ref": "ServiceRole"
+                }
+            }
+        },
+        "Instance" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "InstanceType": { "Ref" : "InstanceType" },
+                "IamInstanceProfile" : { "Ref" : "InstanceProfile" },
+                "ImageId" : {
+                    "Fn::If": [
+                        "UseReferenceAmi",
+                        { "Fn::FindInMap": [ "AWSRegionToAMI", { "Ref": "AWS::Region" }, "id" ] },
+                        { "Ref": "AmiId" }
+                    ]
+                },
+		"SubnetId" : { "Ref" : "PublicSubnet1Id" },
+		"SecurityGroupIds": [
+		    {
+			"Ref": "InstanceSecurityGroup"
+		    }
+		],
+                "BlockDeviceMappings" : [
+                    {
+			"DeviceName" : "/dev/sda1",
+			"Ebs" : {
+                            "VolumeSize" : "{{instance_root_volume_size}}",
+			    "VolumeType" : "{{instance_root_volume_type}}"
+			}
+                    }
+                ],
+		"Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": { "Ref" : "InstanceName" }
+                    },
+                    {
+                        "Key": "NucleatorGroup",
+                        "Value": { "Ref" : "ServiceName" }
+                    },
+                    {{ nucleator_common_tags | to_json_fragment }}
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "\r\n",
+                            [
+                                "<powershell>",
+                                "$script_path = ((Get-Item $env:temp).FullName + \"\\{{connect_scriptname}}\"); Copy-S3Object -BucketName \"{{connect_bucketname}}\" -Key \"{{connect_keyname}}\" -LocalFile \"$script_path\"; $ps_args = \"-noexit\", \"-ExecutionPolicy Bypass\", \"-File \"\"$script_path\"\"\"; Start-Process powershell.exe -ArgumentList $ps_args -NoNewWindow -Wait; Remove-Item -Path \"$script_path\" -Force",
+                                "</powershell>"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "InstanceIpAddress": {
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "Domain": "vpc"
+            }
+        },
+        "InstanceIpAssocation": {
+            "Type": "AWS::EC2::EIPAssociation",
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "InstanceIpAddress",
+                        "AllocationId"
+                    ]
+                },
+                "InstanceId": {
+		    "Ref": "Instance"
+		}
+            }
+        },
+	"InstanceSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable winrm access to Instance",
+                "VpcId": {
+                    "Ref": "VpcId"
+                },
+                "SecurityGroupIngress": [
+		    {% for entry in instance_cidr_whitelist_ingress_rules %}
+		    {% set outer_loop = loop %}
+		    {% for whitelist_cidr in NUCLEATOR_CAGE_CIDR_WHITELIST %}
+		    {
+			"CidrIp": "{{whitelist_cidr}}",
+			{{entry|to_json_fragment}}
+		    }{{"" if loop.last and outer_loop.last else ","}}
+		    {% endfor %}
+		    {% endfor %}
+                ],
+                "SecurityGroupEgress": [
+		    {{instance_egress_rules|to_json_fragment}}
+		],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+				    "security",
+                                    "{{stackset_instance_name}}",
+                                    "unresolvable"
+                                ]
+                            ]
+                        }
+                    },
+		    { "Key": "NucleatorGroup", "Value": "{{bakery_group}}" },
+    		    {{ nucleator_common_tags | to_json_fragment }}
+                ]
+	    }
+	}
+    },
+    "Outputs": {
+        "InstanceId" : {
+            "Description": "ID of the EC2 instance created by this stackset",
+            "Value": { "Ref" : "Instance" }
+        }
+    }
+}
+

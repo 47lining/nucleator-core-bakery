@@ -1,4 +1,0 @@
----
-
-stackset_name: "{{cli_stackset_name}}"
-stackset_instance_name: "{{cli_stackset_instance_name}}"

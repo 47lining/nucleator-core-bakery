@@ -1,4 +1,22 @@
+# Copyright 2016 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 ---
+
+- name: Test that the instance was running and got included in the group
+  fail:
+    msg="Make sure your bakery instance is in the 'running' state before running publish"
+  when: groups['MATCH_NUCLEATORGROUP__' ~ bakery_group] is not defined
 
 - name: Set hosts to image
   set_fact:
@@ -16,6 +34,16 @@
 - name: Log instance region
   debug:
     msg: "{{instance_region}}"
+
+- name: Stop the instance
+  ec2:
+    instance_ids: "{{hostvars[targets[0]]['ec2_id']}}"
+    region: '{{ instance_region }}'
+    state: stopped
+    wait: True
+
+# TODO - once we get off the forked Ansible 1.9.4 and have access
+# to modules/extras/cloud/amazon we can use ec2_remote_facts:
 
 - name: Ensure instance is in a stopped state.
   shell: "aws ec2 describe-instances --instance-id {{hostvars[item]['ec2_id']}} --region {{instance_region}} --output json"

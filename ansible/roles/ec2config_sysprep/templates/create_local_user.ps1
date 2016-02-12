@@ -1,15 +1,25 @@
 #jinja2: newline_sequence:'\r\n'
+# --------------------------------------------------------------------------------------------------#
+# Create a local devops user
+# --------------------------------------------------------------------------------------------------#
 Try
 {
-    $SysPrepTempPath = "{{sysprep_temp_path}}"
     $UserName = "{{sysprep_user_name}}"
     $UserPassword = "{{sysprep_static_password}}"
     $UserDescription = "{{sysprep_user_description}}"
     $UserGroup = "{{sysprep_user_group}}"
+    $DevOpsBaseFolder = "{{sysprep_devops_base_folder}}"
 
-    $LogFilePath = "$SysPrepTempPath/logs/create_local_user.log"
-    New-Item -ItemType Directory -Force -Path "$SysPrepTempPath/logs"
-    Start-Transcript -Path "$LogFilePath" -Append -Force
+    $CurrentDrive = $pwd.Drive.Name.ToLower()
+    $DevOpsBaseFolderPath = "{0}:/{1}" -f $CurrentDrive, $DevOpsBaseFolder
+    $DevOpsLogsPath = "$DevOpsBaseFolderPath/logs"
+    if( -Not ( Test-Path -Path "$DevOpsLogsPath" ) ){
+        $LogsFolder = New-Item -Path "$DevOpsLogsPath" -Type Directory
+    }
+
+    $TranscriptFileName = "{0}_{1}.log" -f $MyInvocation.MyCommand.Name.Replace(".","_"), $(Get-Date -f MM-dd-yyyy_HH_mm_ss)
+    $TranscriptFilePath = "{0}/{1}" -f $DevOpsLogsPath, $TranscriptFileName
+    Start-Transcript -Path "$TranscriptFilePath" -NoClobber
 
     $ComputerName = "$env:COMPUTERNAME"
 
@@ -20,10 +30,10 @@ Try
     $ADSIUserExists = ($ADSIComputerUsers -contains "$UserName")
     if( ! $ADSIUserExists ){
         $User = $ADSIComputer.Create('User',$UserName)
-        Write-Output "`tNo, creating user '$UserName'..."
+        Write-Output "  - No, creating user '$UserName'..."
     }else{
         $User = [ADSI]"WinNT://$ComputerName/$UserName,user"
-        Write-Output "`tYes, user '$UserName' already exists!"
+        Write-Output "  - Yes, user '$UserName' already exists!"
     }
 
     $User.SetPassword($UserPassword)
@@ -38,9 +48,9 @@ Try
     if( ! $ADSIUserIsInGroup ){
         $ADSIUserGroup = [ADSI]"WinNT://$ComputerName/$UserGroup,group"
         $ADSIUserGroup.Add($User.Path)
-        Write-Output "`tNo, adding user '$UserName' to the '$UserGroup' group..."
+        Write-Output "  - No, adding user '$UserName' to the '$UserGroup' group..."
     }else{
-        Write-Output "`tYes, '$UserName' is already a member of the '$UserGroup' group!"
+        Write-Output "  - Yes, '$UserName' is already a member of the '$UserGroup' group!"
     }
 
     Write-Output "That's a wrap!"

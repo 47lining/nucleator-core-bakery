@@ -119,6 +119,7 @@ class StacksetCommand(Command):
             "ami_name": ami_name,
             "bakery_group": bakery_group,
             "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
             "keypair_name": keypair_name
         }
 
@@ -144,7 +145,7 @@ class StacksetCommand(Command):
             playbook = "bakery_delete.yml"
             rolename = self.deleter_role_name
 
-        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None))
+        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None), debug_credentials=kwargs.get("debug_credentials", None))
 
         rc = cli.safe_playbook(self.get_command_playbook(playbook),
                                  rolename,
@@ -213,6 +214,7 @@ class StacksetCommand(Command):
             "customer_name": customer,
             "bakery_group": bakery_group,
             "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
         }
 
         extra_vars["service_name"] = bakery_group
@@ -229,7 +231,7 @@ class StacksetCommand(Command):
 
         playbook = "%s_configure.yml" % self.name
 
-        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None)) # pushes credentials into environment
+        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None), debug_credentials=kwargs.get("debug_credentials", None)) # pushes credentials into environment
 
         return cli.safe_playbook(
             self.get_command_playbook(playbook),
@@ -272,6 +274,7 @@ class StacksetCommand(Command):
             "ami_name": ami_name,
             "ami_region": ami_region,
             "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
         }
 
         extra_vars["service_name"] = bakery_group
@@ -288,7 +291,7 @@ class StacksetCommand(Command):
 
         playbook = "%s_publish.yml" % self.name
 
-        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None)) # pushes credentials into environment
+        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None), debug_credentials=kwargs.get("debug_credentials", None)) # pushes credentials into environment
 
         return cli.safe_playbook(
             self.get_command_playbook(playbook),

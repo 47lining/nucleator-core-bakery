@@ -28,8 +28,10 @@ role_specification:
           Statement :
             - Effect: Allow
               Action:
-                - "s3:ListBucket"
-                - "s3:GetObject"
+                - "s3:List*"
+                - "s3:Get*"
+                - "s3:Put*"
+                - "s3:Create*"
               Resource: arn:aws:s3:::*
             - Effect: Allow
               Action:

@@ -83,7 +83,7 @@ Try
     $xmlOobeSystemShellSetup = $($xml.unattend.settings | Where-Object {$_.pass -eq "oobeSystem"}).component | Where-Object {$_.name -eq "Microsoft-Windows-Shell-Setup"}
     if( $xmlOobeSystemShellSetup ){
         $UserAccounts = $xmlOobeSystemShellSetup.ChildNodes | Where-Object {$_.Name -eq "UserAccounts"}
-        if( ! $UserAccounts ){
+        if( -Not $UserAccounts ){
             Write-Output "  - UserAccounts element didn't exist, we're creating it."
             $UserAccounts = $xml.CreateElement("UserAccounts", $xmlOobeSystemShellSetup.NamespaceURI)
             $xmlOobeSystemShellSetup.AppendChild($UserAccounts);

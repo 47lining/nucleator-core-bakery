@@ -21,9 +21,9 @@ ec2config_handle_userdata: 'Enabled'
 ec2config_set_computer_name: 'Enabled'
 ec2config_dynamic_boot_volume_size: 'Enabled'
 ec2config_cloudwatch_plugin: 'Disabled'
-ec2config_event_log: 'Disabled'
+ec2config_event_log: 'Enabled'
 ec2config_bundle_auto_sysprep: 'No'
-ec2config_bundle_set_rdp_certificate: 'No'
+ec2config_bundle_set_rdp_certificate: 'Yes'
 ec2config_bundle_set_password_after_sysprep: 'No'
 
 ec2config_process_path: 'C:/Program Files/Amazon/Ec2ConfigService/ec2config.exe'
@@ -34,7 +34,8 @@ sysprep_user_name: 'Build'
 sysprep_user_description: 'Nucleator {{sysprep_user_name}} User Account'
 sysprep_user_group: 'Administrators'
 sysprep_computer_name: ''
-sysprep_devops_base_folder: 'devops'
+sysprep_devops_base_folder: 'ihs-devops'
+sysprep_shutdown_delay_seconds: 10
 
 
 

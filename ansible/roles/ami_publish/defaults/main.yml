@@ -20,3 +20,6 @@ ami_wait_timeout: 9600
 instance_state_check_delay: 10
 instance_state_check_retries: 960
 
+ec2_stop_instance: true
+
+

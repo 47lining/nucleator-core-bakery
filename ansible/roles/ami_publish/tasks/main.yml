@@ -41,7 +41,7 @@
     region: '{{ instance_region }}'
     state: stopped
     wait: True
-
+  when: ec2_stop_instance is defined and ec2_stop_instance|bool
 # TODO - once we get off the forked Ansible 1.9.4 and have access
 # to modules/extras/cloud/amazon we can use ec2_remote_facts:
 

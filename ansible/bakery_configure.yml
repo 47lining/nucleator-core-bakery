@@ -36,5 +36,10 @@
     - nucleatorgroups
 
 - hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
+  gather_facts: false
+  roles:
+    - "{{bakery_group}}_configure_pre"
+
+- hosts: MATCH_NUCLEATORGROUP__{{bakery_group}}:&MATCH_NUCLEATORSTACKSETINSTANCE__{{cli_stackset_instance_name}}
   roles:
     - "{{bakery_group}}_configure"
